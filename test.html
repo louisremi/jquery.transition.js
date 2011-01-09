@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CSS Transition Demo powered by jQuery</title>
+    <script src="jquery.js" type="text/javascript"></script>
+    <script src="jquery.transition.js" type="text/javascript"></script>
+    <style>
+    	#slideRight {
+    		position: absolute;
+    		background-color: blue;
+    		width: 100px;
+    		height: 100px;
+    		left: 0px;
+    	}
+    </style>
+  </head>
+  <body>
+    <div id="slideRight">This is a box!</div>
+    <script type="text/javascript">
+    	$(function() {
+    		$('#slideRight').animate({left: 200}, function() { console.log('end') });
+    	});
+    </script>
+  </body>
+</html>
