@@ -10,7 +10,7 @@
     		background-color: blue;
     		width: 100px;
     		height: 100px;
-    		left: 0px;
+    		left: 0px; top: 0px;
     	}
     </style>
   </head>
@@ -18,7 +18,7 @@
     <div id="slideRight">This is a box!</div>
     <script type="text/javascript">
     	$(function() {
-    		$('#slideRight').animate({left: 200}, function() { console.log('end') });
+    		$('#slideRight').animate({left: 200, top: 50}, function() { console.log('end') });
     	});
     </script>
   </body>
