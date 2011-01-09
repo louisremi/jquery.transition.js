@@ -7,6 +7,7 @@
  * 
  * limitations:
  * - doesn't work with option.queue == false
+ * - easing are not implemented yet
  * 
  * latest version and complete README available on Github:
  * https://github.com/lrbabe/jquery.transition.js
