@@ -49,7 +49,7 @@ $.fx.prototype.cur = function() {
 	return isNaN( parsed )? r : parsed;
 }
   
-// Animate needs a small patch to take care of transition-property and transition-duration
+// Animate needs to take care of transition-property, transition-duration and transitionEnd binding
 // TODO: single var ; never use jQuery.each to iterate over prop 
 $.fn.animate = function( prop, speed, easing, callback ) {
   var optall = jQuery.speed(speed, easing, callback);
@@ -207,9 +207,6 @@ $.fx.prototype.custom = function( from, to, unit ) {
   }
   t.elem = self.elem;
   
-  //console.info(this.prop)
-  //console.warn(this.elem.WebkitTransitionProperty, this.elem.WebkitTransitionDuration)
-  
   // use the power of cssHooks
   setTimeout(function() {
   	jQuery.style(self.elem, self.prop, to + unit);
@@ -219,7 +216,7 @@ $.fx.prototype.custom = function( from, to, unit ) {
   jQuery.timers.push(t);
 };
 
-// in step, only the part taking care of animation stopped halfway through need to be forked
+// in step, fork the part taking care of animation stopped halfway through and cleanup the element after a transition
 // TODO: single var ; elem and options should have their own var in all case
 $.fx.prototype.step = function( gotoEnd ) {
   var t = jQuery.now(), done = true,
