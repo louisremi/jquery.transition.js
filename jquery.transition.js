@@ -2,6 +2,8 @@
  * a patched animate mechanism for jQuery using CSS3 transtion power
  * 
  * this plugin is big, but it adds around 30 lines of code to existing jQuery code
+ * unlike other solutions out there it works with all properties that you can possibly animate
+ * and will eventually be compatible with cssHooks!
  * 
  * limitations:
  * - doesn't work with option.queue == false
@@ -132,7 +134,7 @@ $.fn.animate = function( prop, speed, easing, callback ) {
     
     // TRANSITION++
     if ( transition ) {
-    	this.style[transition.name + 'Duration'] = opt.duration/1E3 +'s';
+    	this.style[transition.name + 'Duration'] = opt.duration +'ms';
       this.style[transition.name + 'Property'] = props.join();
       props = {};
     }
