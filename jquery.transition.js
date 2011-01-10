@@ -230,8 +230,8 @@ $.fx.prototype.cur = function() {
 	}
 
 	var r = jQuery.css( this.elem, this.prop ),
-		parsed = parseFloat( r );
-	return isNaN( parsed )? r : parsed;
+		parsed;
+	return r === "" || r === "auto"? 0 : isNaN( parsed = parseFloat(r) )? r : parsed;
 }
 
 // custom can be simplified
