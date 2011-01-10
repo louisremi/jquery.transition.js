@@ -5,19 +5,16 @@
  * unlike other solutions out there it works with all properties that you can possibly animate
  * and will eventually be compatible with cssHooks!
  * 
- * limitations:
+ * current limitations:
  * - doesn't work with option.queue == false
  * - easing are not implemented yet
  * 
  * latest version and complete README available on Github:
  * https://github.com/lrbabe/jquery.transition.js
  * 
- * Copyright (c) 2010 Louis-Rémi Babé twitter.com/louis_remi
- * Licensed under the MIT license.
- * 
- * This saved you an hour of work? 
- * Send me music http://www.amazon.fr/wishlist/HNTU0468LQON
- *
+ * Copyright 2011, John Resig
+ * Dual licensed under the MIT or GPL Version 2 licenses.
+ * http://jquery.org/license
  */
 (function($) {
   
@@ -39,7 +36,7 @@ $.support.transition =
   false))));
   
 // Animate needs to take care of transition-property, transition-duration and transitionEnd binding
-// TODO: single var ; never use jQuery.each to iterate over prop ; cache more jQuery.vars
+// TODO: single var per scope ; never use jQuery.each to iterate over prop ; cache more jQuery.vars
 $.fn.animate = function( prop, speed, easing, callback ) {
   var optall = jQuery.speed(speed, easing, callback),
   	// TRANSITION++
@@ -191,7 +188,7 @@ $.fn.animate = function( prop, speed, easing, callback ) {
 };
 
 // the timers function need to be called at all time, not only when the gotoEnd option is used
-// TODO: can't the reverse for be simplified to for ( var i = timers.length; i -- )?
+// TODO: can't the reverse for be simplified to 'for ( var i = timers.length; i -- )'?
 $.fn.stop = function( clearQueue, gotoEnd ) {
 	var timers = jQuery.timers,
 		// TRANSITION++
