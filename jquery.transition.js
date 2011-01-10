@@ -1,7 +1,7 @@
 /*
  * a patched animate mechanism for jQuery using CSS3 transtion power
  * 
- * this plugin is big, but it adds around 30 lines of code to existing jQuery code
+ * this plugin is big, but it adds around 40 lines of js to existing jQuery code
  * unlike other solutions out there it works with all properties that you can possibly animate
  * and will eventually be compatible with cssHooks!
  * 
@@ -39,9 +39,11 @@ $.support.transition =
   false))));
   
 // Animate needs to take care of transition-property, transition-duration and transitionEnd binding
-// TODO: single var ; never use jQuery.each to iterate over prop 
+// TODO: single var ; never use jQuery.each to iterate over prop ; cache more jQuery.vars
 $.fn.animate = function( prop, speed, easing, callback ) {
-  var optall = jQuery.speed(speed, easing, callback);
+  var optall = jQuery.speed(speed, easing, callback),
+  	// TRANSITION++
+  	trans = jQuery.support.transition;
 
   if ( jQuery.isEmptyObject( prop ) ) {
     return this.each( optall.complete );
@@ -59,7 +61,7 @@ $.fn.animate = function( prop, speed, easing, callback ) {
       props = [],
       // we could cache jQuery.support as well for jQuery.support.inlineBlockNeedsLayout
       // we could also cache jQuery.camelCase and jQuery.style
-      transition = jQuery.support.transition,
+      transition = trans,
       hook;
 
     for ( p in prop ) {
