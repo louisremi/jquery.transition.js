@@ -204,7 +204,7 @@ $.fn.stop = function( clearQueue, gotoEnd ) {
 		for ( var i = timers.length - 1, _transition = transition; i >= 0; i-- ) {
 			if ( timers[i].elem === this ) {
 				// TRANSITION++
-				if ( gotoEnd || _transition ) {
+				if ( gotoEnd || _transition ) {
 					// force the next step to be the last
 					// when using transition, this is also used to stop the animation halfway through
 					timers[i]( gotoEnd, _transition );
@@ -231,7 +231,7 @@ $.fx.prototype.cur = function() {
 
 	var r = jQuery.css( this.elem, this.prop ),
 		parsed;
-	return r === "" || r === "auto"? 0 : isNaN( parsed = parseFloat(r) )? r : parsed;
+	return r === "" || r === "auto"? 0 : isNaN( parsed = parseFloat(r) )? r : parsed;
 }
 
 // custom can be simplified
@@ -244,11 +244,8 @@ $.fx.prototype.custom = function( from, to, unit ) {
   }
   t.elem = self.elem;
   
-  // Firefox need this timeout, still need to figure out why
-  setTimeout(function() {
-  	// use the power of cssHooks
-  	jQuery.style(self.elem, self.prop, to + unit);
-  });
+  // use the power of cssHooks
+	jQuery.style(self.elem, self.prop, to + unit);
   
   jQuery.timers.push(t);
 };
