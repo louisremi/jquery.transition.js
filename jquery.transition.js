@@ -19,7 +19,7 @@
  * Send me music http://www.amazon.fr/wishlist/HNTU0468LQON
  *
  */
-(function($, originalCustom, originalStop) {
+(function($) {
   
 var div = document.createElement('div'),
   divStyle = div.style,
@@ -37,17 +37,6 @@ $.support.transition =
   (divStyle.OTransition === ''? {name: 'OTransition', end: 'oTransitionEnd'} :
   (divStyle.Transition === ''? {name: 'Transition', end: 'transitionEnd'} :
   false))));
-  
-// Fix cur to be cssHooks compatible
-$.fx.prototype.cur = function() {
-	if ( this.elem[this.prop] != null && (!this.elem.style || this.elem.style[this.prop] == null) ) {
-		return this.elem[ this.prop ];
-	}
-
-	var r = jQuery.css( this.elem, this.prop ),
-		parsed = parseFloat( r );
-	return isNaN( parsed )? r : parsed;
-}
   
 // Animate needs to take care of transition-property, transition-duration and transitionEnd binding
 // TODO: single var ; never use jQuery.each to iterate over prop 
@@ -83,6 +72,7 @@ $.fn.animate = function( prop, speed, easing, callback ) {
       }
       
       // TRANSITION++
+      // collect the properties to be added to elem.style.transitionProperty
       props.push(p);
 
       if ( prop[p] === "hide" && hidden || prop[p] === "show" && !hidden ) {
@@ -189,7 +179,7 @@ $.fn.animate = function( prop, speed, easing, callback ) {
     if ( transition ) {
     	jQuery.event.add( this, transition.end +'.animate', function( e ) {
     		// and this should call fx.step( gotoEnd ), one property at a time.
-    		props[jQuery.camelCase(e.originalEvent.propertyName)].step( true );
+    		props[jQuery.camelCase(e.originalEvent.propertyName)].step( true, transition );
     	});
     }
     
@@ -198,31 +188,81 @@ $.fn.animate = function( prop, speed, easing, callback ) {
   });
 };
 
+// the timers function need to be called at all time, not only when the gotoEnd option is used
+// TODO: can't the reverse for be simplified to for ( var i = timers.length; i -- )?
+$.fn.stop = function( clearQueue, gotoEnd ) {
+	var timers = jQuery.timers,
+		// TRANSITION++
+		transition = jQuery.support.transition;
+
+	if ( clearQueue ) {
+		this.queue([]);
+	}
+
+	this.each(function() {
+		// go in reverse order so anything added to the queue during the loop is ignored
+		// TRANSITION++
+		for ( var i = timers.length - 1, _transition = transition; i >= 0; i-- ) {
+			if ( timers[i].elem === this ) {
+				// TRANSITION++
+				if ( gotoEnd || _transition ) {
+					// force the next step to be the last
+					// when using transition, this is also used to stop the animation halfway through
+					timers[i]( gotoEnd, _transition );
+				}
+
+				timers.splice(i, 1);
+			}
+		}
+	});
+
+	// start the next in the queue if the last step wasn't forced
+	if ( !gotoEnd ) {
+		this.dequeue();
+	}
+
+	return this;
+};
+
+// Fix cur to be cssHooks compatible, see #7912
+$.fx.prototype.cur = function() {
+	if ( this.elem[this.prop] != null && (!this.elem.style || this.elem.style[this.prop] == null) ) {
+		return this.elem[ this.prop ];
+	}
+
+	var r = jQuery.css( this.elem, this.prop ),
+		parsed = parseFloat( r );
+	return isNaN( parsed )? r : parsed;
+}
+
 // custom can be simplified
+// Here we're taking a code fork approach, jQuery.support.transition is hence looked up only once when the library is loaded
 if ($.support.transition)
 $.fx.prototype.custom = function( from, to, unit ) {
   var self = this;
-  function t( gotoEnd ) {
-    return self.step(gotoEnd);
+  function t( gotoEnd, transition ) {
+    return self.step( gotoEnd, transition );
   }
   t.elem = self.elem;
   
-  // use the power of cssHooks
+  // Firefox need this timeout, still need to figure out why
   setTimeout(function() {
+  	// use the power of cssHooks
   	jQuery.style(self.elem, self.prop, to + unit);
   });
-  
   
   jQuery.timers.push(t);
 };
 
-// in step, fork the part taking care of animation stopped halfway through and cleanup the element after a transition
+// - add a transition parameter to avoid lookups to jQuery.support.transition in unsupported browsers
+// - handle the case of animations stopped halfway through in browsers supporting transition
+// - cleanup the element after a transition
 // TODO: single var ; elem and options should have their own var in all case
-$.fx.prototype.step = function( gotoEnd ) {
+$.fx.prototype.step = function( gotoEnd, transition ) {
   var t = jQuery.now(), done = true,
   // TRANSITION++
   // we could cache jQuery.support as well for jQuery.support.shrinkWrapBlocks
-  transition = jQuery.support.transition,
+  //transition = jQuery.support.transition, // this lookup  can negatively impact perfs on unsupported browsers
   style = jQuery.style,
   prop = this.prop,
   hook;
@@ -279,6 +319,7 @@ $.fx.prototype.step = function( gotoEnd ) {
 
     return false;
 
+	// TRANSITION++
   } else if ( transition ) {
     // using affectedProperty could be useful here as well, to avoid jQuery.style and cssHooks call
     if ( hook = jQuery.cssHooks[prop] ) {
@@ -322,4 +363,4 @@ function defaultDisplay( nodeName ) {
   return elemdisplay[ nodeName ];
 }
 
-})(jQuery, jQuery.fx.prototype.custom, jQuery.fn.stop);
+})(jQuery);
