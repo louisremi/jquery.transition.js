@@ -28,11 +28,11 @@ var div = document.createElement('div'),
 
 $.support.transition = 
   divStyle.MozTransition === ''? {name: 'MozTransition', end: 'transitionend'} :
-  // this might or might not work in the future
-  (divStyle.MsTransition === ''? {name: 'MsTransition', end: 'msTransitionEnd'} :
+  // Will ms add a prefix to the transitionend event?
+  (divStyle.MsTransition === ''? {name: 'MsTransition', end: 'msTransitionend'} :
   (divStyle.WebkitTransition === ''? {name: 'WebkitTransition', end: 'webkitTransitionEnd'} :
   (divStyle.OTransition === ''? {name: 'OTransition', end: 'oTransitionEnd'} :
-  (divStyle.Transition === ''? {name: 'Transition', end: 'transitionEnd'} :
+  (divStyle.transition === ''? {name: 'transition', end: 'transitionend'} :
   false))));
   
 // Animate needs to take care of transition-property, transition-duration and transitionEnd binding
@@ -56,6 +56,7 @@ $.fn.animate = function( prop, speed, easing, callback ) {
       self = this,
       // TRANSITION++
       props = [],
+      cssHooks = jQuery.cssHooks,
       // we could cache jQuery.support as well for jQuery.support.inlineBlockNeedsLayout
       // we could also cache jQuery.camelCase and jQuery.style
       transition = trans,
@@ -72,7 +73,12 @@ $.fn.animate = function( prop, speed, easing, callback ) {
       
       // TRANSITION++
       // collect the properties to be added to elem.style.transitionProperty
-      props.push(p);
+      if (transition) {
+      	// We are doing the exact same conversion once again after the second loop.
+      	// One of them can probably be spared.
+      	hook = cssHooks[p];
+      	props.push(hook? hook.affectedProperty || p : p);
+      }
 
       if ( prop[p] === "hide" && hidden || prop[p] === "show" && !hidden ) {
         return opt.complete.call(this);
@@ -168,7 +174,7 @@ $.fn.animate = function( prop, speed, easing, callback ) {
       	// the developer needs to tell us, so that we can detect the transition end of that hook.
       	// he/she will also take care of browser normalization.
       	// note: this breaks if different hooks affect the same property, but this is unlikely to happen
-				hook = jQuery.cssHooks[name];
+				hook = cssHooks[name];
       	// affectedProperty could also be named "targetProp", "transitionEquivalent", or anything, really.
       	props[hook? hook.affectedProperty || name : name] = e;
       }
