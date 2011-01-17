@@ -77,7 +77,7 @@ $.fn.animate = function( prop, speed, easing, callback ) {
       	// We are doing the exact same conversion once again after the second loop.
       	// One of them can probably be spared.
       	hook = cssHooks[p];
-      	props.push(hook? hook.affectedProperty || p : p);
+      	props.push(hook? hook.affectedProperty.replace(/([A-Z])/g, '-$1').toLowerCase() || p : p);
       }
 
       if ( prop[p] === "hide" && hidden || prop[p] === "show" && !hidden ) {
@@ -175,7 +175,7 @@ $.fn.animate = function( prop, speed, easing, callback ) {
       	// he/she will also take care of browser normalization.
       	// note: this breaks if different hooks affect the same property, but this is unlikely to happen
 				hook = cssHooks[name];
-      	// affectedProperty could also be named "targetProp", "transitionEquivalent", or anything, really.
+				// affectedProperty could also be named "targetProp", "transitionEquivalent", or anything, really.
       	props[hook? hook.affectedProperty || name : name] = e;
       }
     });
@@ -270,7 +270,7 @@ $.fx.prototype.step = function( gotoEnd, transition ) {
   hook;
 
   // TRANSITION++
-  if ( transition || gotoEnd || t >= this.options.duration + this.startTime ) {
+  if ( transition || gotoEnd || t >= this.options.duration + this.startTime ) {
     if ( !transition ) {
       this.now = this.end;
       this.pos = this.state = 1;

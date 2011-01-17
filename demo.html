@@ -4,7 +4,6 @@
     <title>CSS Transition Demo powered by jQuery</title>
     <script src="jquery.js" type="text/javascript"></script>
     <script src="jquery.transition.js" type="text/javascript"></script>
-    <script src="jquery.transform.js" type="text/javascript"></script>
     <style>
     	#slideRight {
     		position: absolute;
@@ -23,13 +22,13 @@
     		var $status = $('#status'),
     			$elem = $('#slideRight')
     				.queue(function() { $status.text('simple animation'); $(this).dequeue(); })
-	    			.animate({transform: 'translate(200px, 50px)'}, 2000)
+	    			.animate({left: 200, top: 50}, 2000)
 	    			.queue(function() { $status.text('queued animation'); $(this).dequeue(); })
-	    			.animate({transform: 'translate(50px, 200px)'})
+	    			.animate({left: 50, top: 200})
 	    			.queue(function() { $status.text('slow animation'); $(this).dequeue(); })
-	    			.animate({transform: 'translate(150px, 150px)'}, 'slow')
+	    			.animate({left: 150, top: 150}, 'slow')
 	    			.queue(function() { $status.text('...'); $(this).dequeue(); })
-	    			.animate({transform: 'translate(0px, 0px)'}, 4000),
+	    			.animate({left: 0, top: 0}, 4000),
 	    		elem = $elem[0];
     		
     		setTimeout(function() {
