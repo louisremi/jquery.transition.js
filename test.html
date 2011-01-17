@@ -16,9 +16,35 @@
   </head>
   <body>
     <div id="slideRight">This is a box!</div>
+    <div id="status"></div>
     <script type="text/javascript">
     	$(function() {
-    		$('#slideRight').animate({left: 200, top: 50}, function() { console.log('end') });
+    		var $status = $('#status'),
+    			$elem = $('#slideRight')
+    				.queue(function() { $status.text('simple animation'); $(this).dequeue(); })
+	    			.animate({left: 200, top: 50}, 2000)
+	    			.queue(function() { $status.text('queued animation'); $(this).dequeue(); })
+	    			.animate({left: 50, top: 200})
+	    			.queue(function() { $status.text('slow animation'); $(this).dequeue(); })
+	    			.animate({left: 150, top: 150}, 'slow')
+	    			.queue(function() { $status.text('...'); $(this).dequeue(); })
+	    			.animate({left: 0, top: 0}, 4000),
+	    		elem = $elem[0];
+    		
+    		setTimeout(function() {
+    			$status.text('stop animation halfway through');
+    			$elem.stop();
+    			setTimeout(function() {
+    				$elem
+    					.queue(function() { $status.text('...'); $(this).dequeue(); })
+    					.css({top: 0, left: 0})
+    					.animate({top: 200, left: 200}, 5000);
+    				setTimeout(function() {
+    					$status.text('stop animation halfway through and goToEnd');
+    					$elem.stop(false, true);
+    				}, 2000);
+    			}, 1500);
+    		}, 4600)
     	});
     </script>
   </body>

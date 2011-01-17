@@ -269,12 +269,22 @@ $.fx.prototype.step = function( gotoEnd, transition ) {
   prop = this.prop,
   hook;
 
-  if ( gotoEnd || t >= this.options.duration + this.startTime ) {
-    // TRANSITION++
+  // TRANSITION++
+  if ( transition || gotoEnd || t >= this.options.duration + this.startTime ) {
     if ( !transition ) {
       this.now = this.end;
       this.pos = this.state = 1;
       this.update();
+
+    // Stop a transition halfway through
+    } else if ( !gotoEnd ) {
+    	// using affectedProperty could be useful here as well, to avoid jQuery.style and cssHooks call
+	    if ( hook = jQuery.cssHooks[prop] ) {
+	    	prop = hook.affectedProperty || prop;
+	    }
+	    // yes, stoping a transition halfway through should be as simple as setting a property to its current value.
+	    // Try to call window.getComputedStyle() only once per element (in tick()?)
+	    this.elem.style[prop] = window.getComputedStyle(this.elem)[prop];
     }
 
     this.options.curAnim[ this.prop ] = true;
@@ -321,16 +331,7 @@ $.fx.prototype.step = function( gotoEnd, transition ) {
 
     return false;
 
-	// TRANSITION++
-  } else if ( transition ) {
-    // using affectedProperty could be useful here as well, to avoid jQuery.style and cssHooks call
-    if ( hook = jQuery.cssHooks[prop] ) {
-    	prop = hook.affectedProperty || prop;
-    }
-    // yes, stoping a transition halfway through should be as simple as setting a property to its current value.
-    this.elem.style[prop] = this.elem.style[prop];
-  
-  } else {
+	} else {
     var n = t - this.startTime;
     this.state = n / this.options.duration;
 
