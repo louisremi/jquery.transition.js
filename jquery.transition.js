@@ -320,8 +320,8 @@ $.fx.prototype.step = function( gotoEnd, transition ) {
       
       // TRANSITION++
       if ( transition ) {
-      	this.elem.style[transition.name + 'Duration'] = '';
-      	this.elem.style[transition.name + 'Property'] = '';
+      	this.elem.style[transition.name + 'Duration'] = '0';
+      	this.elem.style[transition.name + 'Property'] = 'none';
       	jQuery.event.remove( this.elem, transition.end +'.animate' );
       }
 
