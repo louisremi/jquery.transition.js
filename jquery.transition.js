@@ -1,21 +1,11 @@
-/*
- * a patched animation mechanism for jQuery using CSS3 transtion power.
- *
- * Should work with all properties and some cssHooks as well.
- *
- * Cases where transition is disabled:
+/* Cases where transition is disabled:
  * - in incompatible browsers (Opera 11 included)
  * - when the animated object is not an element
- * - when the easing is not linear or swing
+ * - when there is a special easing
  * - when there is a step function
  * - when jQuery.fx.off is true (should work out of the box)
  *
- * latest version and complete README available on Github:
- * https://github.com/lrbabe/jquery.transition.js
- *
- * Copyright 2011, John Resig
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
+ * jQuery.fx.stop() will stop animations instead of pausing them (undocumented method and behavior anyway).
  */
 (function( jQuery ) {
 
@@ -173,7 +163,7 @@ jQuery.fn.extend({
 				supportTransition = !opt.step && support.transition,
 				transition,
 				transitions = [],
-				hook;
+				hook, real, lower;
 
 			// jQuery.now() is called only once for all animated properties of all elements
 			if (!startTime) {
@@ -255,15 +245,20 @@ jQuery.fn.extend({
 
 				// collect the properties to be added to elem.style.transition...
 				if ( transition ) {
-					opt.transition[p] = true;
-
 					hook = cssHooks[p];
-					p = hook && hook.affectedProperty || p;
+					real = hook && hook.realProperty || p;
+
+					lower = real.replace(/([A-Z])/g, '-$1').toLowerCase();
 
 					transition =
-						unCamelCase(p) +" "+
+						lower +" "+
 						opt.duration +"ms "+
 						transition;
+
+					opt.transition[p] = {
+						lower: lower,
+						real: real
+					};
 
 					transitions.push(transition);
 				}
@@ -374,9 +369,9 @@ jQuery.each({
 	jQuery.fn[ name ] = function( speed, easing, callback ) {
 		return this.animate( props, speed, easing, callback );
 	};
-});*/
+});
 
-/*jQuery.extend({
+jQuery.extend({
 	speed: function( speed, easing, fn ) {
 		var opt = speed && typeof speed === "object" ? jQuery.extend({}, speed) : {
 			complete: fn || !fn && easing ||
@@ -425,9 +420,9 @@ jQuery.each({
 });*/
 
 jQuery.extend( jQuery.fx.prototype, {
-//jQuery.fx.prototype = {
+/*jQuery.fx.prototype = {
 	// Simple function for setting a style value
-	/*update: function() {
+	update: function() {
 		if ( this.options.step ) {
 			this.options.step.call( this.elem, this.now, this );
 		}
@@ -479,9 +474,7 @@ jQuery.extend( jQuery.fx.prototype, {
 			timers.push(t);
 
 			// explicitely set the property to it's current computed value to workaround bugzil.la/571344
-			hook = jQuery.cssHooks[prop];
-			prop = hook && hook.affectedProperty || prop;
-			self.elem.style[prop] = jQuery.css( self.elem, prop );
+			self.elem.style[transition[prop].real] = jQuery.css( self.elem, prop );
 
 			// Don't set the style immediatly, the transition property has not been filled yet
 			setTimeout(function() {
@@ -490,7 +483,7 @@ jQuery.extend( jQuery.fx.prototype, {
 
 			// use a setTimeout to detect the end of a transition
 			// the transitionend event is unreliable
-			transition[prop] = setTimeout(function() {
+			transition[prop].timeout = setTimeout(function() {
 				timers.splice(timers.indexOf(t), 1);
 				self.step(true);
 			// add an unperceptible delay to help some tests to pass in Firefox
@@ -501,8 +494,8 @@ jQuery.extend( jQuery.fx.prototype, {
 		}
 	},
 
-	// Simple 'show' function
-	/*show: function( startTime ) {
+	/*// Simple 'show' function
+	show: function( startTime ) {
 		// Remember where we started, so that we can go back to it later
 		this.options.orig[this.prop] = jQuery.style( this.elem, this.prop );
 		this.options.show = true;
@@ -547,15 +540,13 @@ jQuery.extend( jQuery.fx.prototype, {
 
 			// TRANSITION++
 			} else {
-				clearTimeout(transition);
+				clearTimeout(transition.timeout);
 				// Stop a transition halfway through
 				if ( !gotoEnd ) {
-					hook = jQuery.cssHooks[prop];
-					prop = hook && hook.affectedProperty || prop;
-			    // yes, stoping a transition halfway through should be as simple as setting a property to its current value.
-			    // Try to call window.getComputedStyle() only once per element (in tick()?)
-			    this.elem.style[prop] = jQuery.css( this.elem, prop );
-			  }
+					// yes, stoping a transition halfway through should be as simple as setting a property to its current value.
+					// Try to call window.getComputedStyle() only once per element (in tick()?)
+					this.elem.style[transition.real] = jQuery.css( this.elem, transition.real );
+				}
 			}
 
 			options.animatedProperties[ this.prop ] = true;
@@ -593,7 +584,7 @@ jQuery.extend( jQuery.fx.prototype, {
 				if ( (supportTransition = elem.nodeType === 1 && jQuery.support.transition) ) {
 					transition = ',' + elem.style[supportTransition];
 					for ( p in options.transition ) {
-						transition = transition.split( unCamelCase(p) ).join('_');
+						transition = transition.split( options.transition[p].lower ).join('_');
 					}
 					elem.style[supportTransition] = transition.replace(/, ?_[^,]*/g, '').substr(1);
 				}
@@ -695,10 +686,6 @@ function defaultDisplay( nodeName ) {
 	}
 
 	return elemdisplay[ nodeName ];
-}
-
-function unCamelCase( prop ) {
-	return prop.replace(/([A-Z])/g, '-$1').toLowerCase();
 }
 
 })( jQuery );
