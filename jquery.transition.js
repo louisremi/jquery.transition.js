@@ -158,7 +158,7 @@ jQuery.fn.extend({
 				e,
 				parts, start, end, unit,
 				// TRANSITION++
-				cssHooks = jQuery.cssHooks,
+				cssProps = jQuery.cssProps,
 				// disable transition if a step option is supplied
 				supportTransition = !opt.step && support.transition,
 				transition,
@@ -245,8 +245,7 @@ jQuery.fn.extend({
 
 				// collect the properties to be added to elem.style.transition...
 				if ( transition ) {
-					hook = cssHooks[p];
-					real = hook && hook.realProperty || p;
+					real = cssProps[p] || p;
 
 					lower = real.replace(/([A-Z])/g, '-$1').toLowerCase();
 
