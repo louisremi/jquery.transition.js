@@ -12,7 +12,8 @@
 var elemdisplay = {},
 	rfxtypes = /^(?:toggle|show|hide)$/,
 	rfxnum = /^([+\-]=)?([\d+.\-]+)([a-z%]*)$/i,
-	timerId/*,
+	timerId,
+	effectsTimestamp/*,
 	fxAttrs = [
 		// height animations
 		[ "height", "marginTop", "marginBottom", "paddingTop", "paddingBottom" ],
@@ -25,13 +26,14 @@ var elemdisplay = {},
 // TRANSITION++
 // Following feature test code should be moved to support.js
 var div = document.createElement('div'),
-	divStyle = div.style;
+	divStyle = div.style,
+	trans = "Transition";
 // Only test for transition support in Firefox and Webkit 
 // as we know for sure that Opera has too much bugs (see http://csstransition.net)
 // and there's no guarantee that first IE implementation will be bug-free
 jQuery.support.transition =
-	divStyle.MozTransition === '' ? 'MozTransition':
-	divStyle.WebkitTransition === '' ? 'WebkitTransition':
+	'Moz'+trans in divStyle ? 'Moz'+trans:
+	'Webkit'+trans in divStyle ? 'Webkit'+trans:
 	false;
 // prevent IE memory leak;
 div = divStyle = null;
@@ -130,7 +132,7 @@ jQuery.fn.extend({
 	animate: function( prop, speed, easing, callback ) {
 		var optall = jQuery.speed(speed, easing, callback),
 			// Fix #7917, synchronize animations.
-			_startTime = optall.startTime;
+			_startTime = effectsNow();
 
 		if ( jQuery.isEmptyObject( prop ) ) {
 			return this.each( optall.complete );
@@ -478,15 +480,15 @@ jQuery.extend( jQuery.fx.prototype, {
 			// Don't set the style immediatly, the transition property has not been filled yet
 			setTimeout(function() {
 				jQuery.style( self.elem, prop, to + self.unit );
-			});
 
-			// use a setTimeout to detect the end of a transition
-			// the transitionend event is unreliable
-			transition[prop].timeout = setTimeout(function() {
-				timers.splice(timers.indexOf(t), 1);
-				self.step(true);
-			// add an unperceptible delay to help some tests to pass in Firefox
-			}, self.options.duration + 30);
+				// use a setTimeout to detect the end of a transition
+				// the transitionend event is unreliable
+				transition[prop].timeout = setTimeout(function() {
+					timers.splice(timers.indexOf(t), 1);
+					self.step(true);
+				// add an unperceptible delay to help some tests pass in Firefox
+				}, self.options.duration + 30);
+			}, 0);
 
 		} else if ( t( false, startTime ) && timers.push(t) && !timerId ) {
 			timerId = setInterval(fx.tick, fx.interval);
@@ -685,6 +687,17 @@ function defaultDisplay( nodeName ) {
 	}
 
 	return elemdisplay[ nodeName ];
+}
+
+// Function to synchronize now() values between animations
+function effectsNow() {
+	if ( !effectsTimestamp ) {
+		effectsTimestamp = jQuery.now();
+		setTimeout(function() {
+			effectsTimestamp = null;
+		}, 0);
+	}
+	return effectsTimestamp;
 }
 
 })( jQuery );
