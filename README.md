@@ -37,8 +37,8 @@ It is actually a patched version of effects.js (animation component), stripped f
 
 The main benefit is that the **full jQuery API** is available.
 Even better, it has been designed to be compatible with cssHooks.
-The first cssHooks that can demonstrate this fact is [jquery.transform.js](http://github.com/lrbabe/jquery.transform.js).
-Other cssHooks will follow.
+The first compatible one is [jquery.transform.js](http://github.com/lrbabe/jquery.transform.js).
+Others will follow.
 
 jquery.transition.js has been tested against jQuery unit-tests, and only 8 of them fail, mostly for timing issues.
 It benefits from the experience of writing [csstransition.net](http://www.csstransition.net/) to workaround implementation quirks.
