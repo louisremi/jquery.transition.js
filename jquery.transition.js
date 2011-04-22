@@ -13,8 +13,35 @@ var elemdisplay = {},
 	rfxtypes = /^(?:toggle|show|hide)$/,
 	rfxnum = /^([+\-]=)?([\d+.\-]+)([a-z%]*)$/i,
 	timerId,
-	effectsTimestamp/*,
-	fxAttrs = [
+        // Function to synchronize now() values between animations
+	effectsTimestamp,
+        effectsNow= function () {
+                if ( !effectsTimestamp ) {
+                        effectsTimestamp = jQuery.now();
+                        setTimeout(function() {
+                                effectsTimestamp = null;
+                        }, 0);
+                }
+                return effectsTimestamp;
+        },
+        defaultDisplay= function ( nodeName ) {
+                if ( !elemdisplay[ nodeName ] ) {
+                        var elem = jQuery("<" + nodeName + ">").appendTo("body"),
+                                display = elem.css("display");
+        
+                        elem.remove();
+        
+                        if ( display === "none" || display === "" ) {
+                                display = "block";
+                        }
+        
+                        elemdisplay[ nodeName ] = display;
+                }
+        
+                return elemdisplay[ nodeName ];
+        }
+	/*
+	,fxAttrs = [
 		// height animations
 		[ "height", "marginTop", "marginBottom", "paddingTop", "paddingBottom" ],
 		// width animations
@@ -27,16 +54,17 @@ var elemdisplay = {},
 // Following feature test code should be moved to support.js
 var div = document.createElement('div'),
 	divStyle = div.style,
-	trans = "Transition";
+	trans = "-transition";
 // Only test for transition support in Firefox and Webkit 
 // as we know for sure that Opera has too much bugs (see http://csstransition.net)
 // and there's no guarantee that first IE implementation will be bug-free
 jQuery.support.transition =
-	'Moz'+trans in divStyle ? 'Moz'+trans:
-	'Webkit'+trans in divStyle ? 'Webkit'+trans:
+	'-moz'+trans in divStyle ? '-moz'+trans:
+	'-webkit'+trans in divStyle ? '-webkit'+trans:
 	false;
 // prevent IE memory leak;
 div = divStyle = null;
+
 
 jQuery.fn.extend({
 	/*show: function( speed, easing, callback ) {
@@ -155,17 +183,38 @@ jQuery.fn.extend({
 				isElement = self.nodeType === 1,
 				hidden = isElement && jQuery(self).is(":hidden"),
 				thisStyle = self.style,
-				name, val, easing,
+				name,
+                                val,
+                                //easing,
 				display,
 				e,
-				parts, start, end, unit,
+				parts,
+                                start,
+                                end,
+                                unit,
 				// TRANSITION++
 				cssProps = jQuery.cssProps,
 				// disable transition if a step option is supplied
 				supportTransition = !opt.step && support.transition,
 				transition,
-				transitions = [],
-				hook, real, lower;
+				supportedEasing= {
+					'linear': true
+					,'ease': true
+					,'ease-in': true
+					,'ease-out': true
+					,'ease-in-out': true
+					,'cubic-bezier': true
+				},
+				transitionProperties= [],
+				//hook,
+                                real,
+                                lower;
+
+			// prevent transition when a special easing is supplied
+			if ( opt.easing !== undefined && !supportedEasing[opt.easing] ) {
+				// For JS strict compliance
+				return true;
+			}
 
 			// jQuery.now() is called only once for all animated properties of all elements
 			if (!startTime) {
@@ -181,134 +230,141 @@ jQuery.fn.extend({
 			opt.transition = {};
 
 			for ( p in prop ) {
-
-				// property name normalization
-				name = jQuery.camelCase( p );
-				if ( p !== name ) {
-					prop[ name ] = prop[ p ];
-					delete prop[ p ];
-					p = name;
-				}
-
-				val = prop[p];
-
-				if ( val === "hide" && hidden || val === "show" && !hidden ) {
-					return opt.complete.call(self);
-				}
-
-				if ( isElement && ( p === "height" || p === "width" ) ) {
-					// Make sure that nothing sneaks out
-					// Record all 3 overflow attributes because IE does not
-					// change the overflow attribute when overflowX and
-					// overflowY are set to the same value
-					opt.overflow = [ thisStyle.overflow, thisStyle.overflowX, thisStyle.overflowY ];
-
-					// Set display property to inline-block for height/width
-					// animations on inline elements that are having width/height
-					// animated
-					if ( css( self, "display" ) === "inline" &&
-							css( self, "float" ) === "none" ) {
-						if ( !support.inlineBlockNeedsLayout ) {
-							thisStyle.display = "inline-block";
-
-						} else {
-							display = defaultDisplay(self.nodeName);
-
-							// inline-level elements accept inline-block;
-							// block-level elements need to be inline with layout
-							if ( display === "inline" ) {
-								thisStyle.display = "inline-block";
-
-							} else {
-								thisStyle.display = "inline";
-								thisStyle.zoom = 1;
-							}
-						}
-					}
-				}
-
-				// easing resolution: per property > opt.specialEasing > opt.easing > 'swing' (default)
-				if ( jQuery.isArray( val ) ) {
-					easing = val[1];
-					val = val[0];
-				} else {
-					easing = opt.specialEasing && opt.specialEasing[p] || opt.easing || 'swing';
-				}
-				opt.animatedProperties[p] = easing;
-
-				// TRANSITION++
-				// prevent transition when a special easing is supplied
-				transition = supportTransition && isElement && (
-					// we could use a hash to convert the names
-					easing == 'swing' ? 'ease':
-					easing == 'linear' ? easing:
-					false
-				);
-
-				// collect the properties to be added to elem.style.transition...
-				if ( transition ) {
-					real = cssProps[p] || p;
-
-					lower = real.replace(/([A-Z])/g, '-$1').toLowerCase();
-
-					transition =
-						lower +" "+
-						opt.duration +"ms "+
-						transition;
-
-					opt.transition[p] = {
-						lower: lower,
-						real: real
-					};
-
-					transitions.push(transition);
+                                if(prop.hasOwnProperty(p)) {
+                                        
+                                        // property name normalization
+                                        name = jQuery.camelCase( p );
+                                        if ( p !== name ) {
+                                                prop[ name ] = prop[ p ];
+                                                delete prop[ p ];
+                                                p = name;
+                                        }
+        
+                                        val = prop[p];
+        
+                                        if ( (val === "hide" && hidden) || (val === "show" && !hidden) ) {
+                                                return opt.complete.call(self);
+                                        }
+        
+                                        if ( isElement && ( p === "height" || p === "width" ) ) {
+                                                // Make sure that nothing sneaks out
+                                                // Record all 3 overflow attributes because IE does not
+                                                // change the overflow attribute when overflowX and
+                                                // overflowY are set to the same value
+                                                opt.overflow = [ thisStyle.overflow, thisStyle.overflowX, thisStyle.overflowY ];
+        
+                                                // Set display property to inline-block for height/width
+                                                // animations on inline elements that are having width/height
+                                                // animated
+                                                
+                                                if ( css( self, "display" ) === "inline" && css( self, "float" ) === "none" ) {
+                                                        if ( !support.inlineBlockNeedsLayout ) {
+                                                                thisStyle.display = "inline-block";
+        
+                                                        } else {
+                                                                display = defaultDisplay(self.nodeName);
+        
+                                                                // inline-level elements accept inline-block;
+                                                                // block-level elements need to be inline with layout
+                                                                if ( display === "inline" ) {
+                                                                        thisStyle.display = "inline-block";
+        
+                                                                } else {
+                                                                        thisStyle.display = "inline";
+                                                                        thisStyle.zoom = 1;
+                                                                }
+                                                        }
+                                                }
+                                        }
+        
+                                        // easing resolution: per property > opt.specialEasing > opt.easing > 'swing' (default)
+                                        /*if ( jQuery.isArray( val ) ) {
+                                                easing = val[1];
+                                                val = val[0];
+                                        } else {
+                                                easing = opt.specialEasing && opt.specialEasing[p] || opt.easing || 'swing';
+                                        }
+                                        opt.animatedProperties[p] = easing;*/
+        
+                                        // TRANSITION++
+                                        // prevent transition when a special easing is supplied
+                                        /*easing = supportTransition && isElement && (
+                                                // we could use a hash to convert the names
+                                                easing == 'swing' ? 'ease':
+                                                easing == 'linear' ? easing:
+                                                false
+                                        );*/
+        
+                                        // collect the properties to be added to elem.style.transition...
+                                        real = cssProps[p] || p;
+                                        lower = real.replace(/([A-Z])/g, '-$1').toLowerCase();
+                                        transitionProperties.push(lower);
+        
+                                        opt.transition[p] = {
+                                                lower: lower,
+                                                real: real
+                                        };
 				}
 			}
 
-			if ( opt.overflow != null ) {
+			if ( opt.overflow ) {
 				thisStyle.overflow = "hidden";
 			}
 
 			for ( p in prop ) {
-				e = new fx( self, opt, p );
+                                if(prop.hasOwnProperty(p)) {
+                                        e = new fx( self, opt, p );
+        
+                                        val = prop[p];
+        
+                                        if ( rfxtypes.test(val) ) {
+                                                e[ val === "toggle" ? hidden ? "show" : "hide" : val ]( startTime );
+        
+                                        } else {
+                                                parts = rfxnum.exec(val);
+                                                start = e.cur();
+        
+                                                if ( parts ) {
+                                                        end = parseFloat( parts[2] );
+                                                        unit = parts[3] || ( jQuery.cssNumber[ name ] ? "" : "px" );
+        
+                                                        // We need to compute starting value
+                                                        if ( unit !== "px" ) {
+                                                                style( self, p, (end || 1) + unit);
+                                                                start = ((end || 1) / e.cur()) * start;
+                                                                style( self, p, start + unit);
+                                                        }
+        
+                                                        // If a +=/-= token was provided, we're doing a relative animation
+                                                        if ( parts[1] ) {
+                                                                end = ((parts[1] === "-=" ? -1 : 1) * end) + start;
+                                                        }
+        
+                                                        e.custom( startTime, start, end, unit );
+        
+                                                } else {
+                                                        e.custom( startTime, start, val, "" );
+                                                }
+                                        }
+                                }
+			}
 
-				val = prop[p];
+			if(transitionProperties.length) {
+				transition= {
+					'property': transitionProperties.join(','),
+					'duration': opt.duration + "ms "
+				};
 
-				if ( rfxtypes.test(val) ) {
-					e[ val === "toggle" ? hidden ? "show" : "hide" : val ]( startTime );
-
-				} else {
-					parts = rfxnum.exec(val);
-					start = e.cur();
-
-					if ( parts ) {
-						end = parseFloat( parts[2] );
-						unit = parts[3] || ( jQuery.cssNumber[ name ] ? "" : "px" );
-
-						// We need to compute starting value
-						if ( unit !== "px" ) {
-							style( self, p, (end || 1) + unit);
-							start = ((end || 1) / e.cur()) * start;
-							style( self, p, start + unit);
-						}
-
-						// If a +=/-= token was provided, we're doing a relative animation
-						if ( parts[1] ) {
-							end = ((parts[1] === "-=" ? -1 : 1) * end) + start;
-						}
-
-						e.custom( startTime, start, end, unit );
-
-					} else {
-						e.custom( startTime, start, val, "" );
-					}
+				if(opt.easing) {
+					transition['timing-function']= opt.easing;
 				}
 			}
 
-			// TRANSITION++
-			if ( supportTransition && transitions.length ) {
-				transition = thisStyle[supportTransition];
-				thisStyle[supportTransition] = transitions.join() + (transition ? ',' + transition : '');
+			if ( supportTransition && transition) {
+				// easily ex
+				jQuery.each(transition, function(key, value){
+					thisStyle[supportTransition + '-' + key] = value;
+				});
 			}
 
 			// For JS strict compliance
@@ -437,7 +493,7 @@ jQuery.extend( jQuery.fx.prototype, {
 			prop = this.prop,
 			r,
 			parsed;
-		if ( elem[prop] != null && (!elem.style || elem.style[prop] == null) ) {
+		if ( elem[prop] && (!elem.style || !elem.style[prop] ) ) {
 			return elem[ prop ];
 		}
 
@@ -455,8 +511,8 @@ jQuery.extend( jQuery.fx.prototype, {
 			prop = self.prop,
 			// TRANSITION++
 			transition = self.options.transition,
-			timers = jQuery.timers,
-			hook;
+			//hook,
+			timers = jQuery.timers;
 
 		self.startTime = startTime;
 		self.start = from;
@@ -527,10 +583,10 @@ jQuery.extend( jQuery.fx.prototype, {
 			options = this.options,
 			duration = options.duration,
 			// TRANSITION++
-			prop = this.prop,
+			//prop = this.prop,
 			transition = options.transition[this.prop],
 			supportTransition,
-			hook,
+			//hook,
 			i, p, style;
 
 		if ( transition || gotoEnd || t >= duration + this.startTime ) {
@@ -560,7 +616,7 @@ jQuery.extend( jQuery.fx.prototype, {
 
 			if ( done ) {
 				// Reset the overflow
-				if ( options.overflow != null && !jQuery.support.shrinkWrapBlocks ) {
+				if ( options.overflow && !jQuery.support.shrinkWrapBlocks ) {
 
 					jQuery.each( [ "", "X", "Y" ], function (index, value) {
 						elem.style[ "overflow" + value ] = options.overflow[index];
@@ -576,16 +632,21 @@ jQuery.extend( jQuery.fx.prototype, {
 				if ( options.hide || options.show ) {
 					style = jQuery.style;
 					for ( p in options.animatedProperties ) {
-						style( elem, p, options.orig[p] );
+						if(options.animatedProperties .hasOwnProperty(p)) {
+							style( elem, p, options.orig[p] );
+						}
 					}
 				}
 
 				// TRANSITION++
 				// cleanup the transition property
-				if ( (supportTransition = elem.nodeType === 1 && jQuery.support.transition) ) {
+				supportTransition = elem.nodeType;
+				if ( (supportTransition === 1 && jQuery.support.transition) ) {
 					transition = ',' + elem.style[supportTransition];
 					for ( p in options.transition ) {
-						transition = transition.split( options.transition[p].lower ).join('_');
+						if(options.transition.hasOwnProperty(p)) {
+							transition= transition.split( options.transition[p].lower ).join('_');
+						}
 					}
 					elem.style[supportTransition] = transition.replace(/, ?_[^,]*/g, '').substr(1);
 				}
@@ -598,7 +659,7 @@ jQuery.extend( jQuery.fx.prototype, {
 
 		} else {
 			// classical easing cannot be used with an Infinity duration
-			if (duration == Infinity) {
+			if (duration === Infinity) {
 				this.now = t;
 			} else {
 				var n = t - this.startTime;
@@ -671,33 +732,5 @@ jQuery.extend( jQuery.fx, {
 		}).length;
 	};
 }*/
-
-function defaultDisplay( nodeName ) {
-	if ( !elemdisplay[ nodeName ] ) {
-		var elem = jQuery("<" + nodeName + ">").appendTo("body"),
-			display = elem.css("display");
-
-		elem.remove();
-
-		if ( display === "none" || display === "" ) {
-			display = "block";
-		}
-
-		elemdisplay[ nodeName ] = display;
-	}
-
-	return elemdisplay[ nodeName ];
-}
-
-// Function to synchronize now() values between animations
-function effectsNow() {
-	if ( !effectsTimestamp ) {
-		effectsTimestamp = jQuery.now();
-		setTimeout(function() {
-			effectsTimestamp = null;
-		}, 0);
-	}
-	return effectsTimestamp;
-}
 
 })( jQuery );
