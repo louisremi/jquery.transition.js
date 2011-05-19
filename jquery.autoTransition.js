@@ -46,7 +46,7 @@ if ( !supportTransition || $.hoverTransition.test ) {
 		while ( i-- ) {
 			// if the stylesheet gives us security issues and is readOnly, exit here
 			//if ( docSS[i].readOnly ) { continue };
-			rules = docSS[i].rules || docSS[i].cssRules;
+			rules = docSS[i].rules || docSS[i].cssRules;
 			j = rules.length;
 			// Loop through all rules
 			while ( j-- ) {
@@ -113,7 +113,7 @@ if ( !supportTransition || $.hoverTransition.test ) {
 						split[0]:
 						// use the body otherwise
 						document.body;
-					delegate = typeof split != "string" ? split[1] : split;
+					delegate = typeof split != "string" ? split[1] : split;
 					
 					$(listener).delegate( delegate, hfEvents[0].join(" "), function() {
 						var $animated = animated ? $(this).find(animated) : $(this),
