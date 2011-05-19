@@ -1,8 +1,14 @@
-jQuery.transition.js
-====================
+The jQuery Transition project
+=============================
 
-jquery.transitions.js makes it easy to use CSS3 Transitions in compatible browsers
-by replacing the classical `setInterval` based animation logic.
+This project aims at making it easier to use CSS3 Transitions in compatible browsers.
+It is now composed of two different scripts:
+
+- With `jquery.transition.js` you can write animations using the usual `.animate()` method of jQuery. Modern browsers will *execute* the animation using CSS3, older browsers will fall-back to the classical javascript way.
+- With `jquery.hoverTransition.js` you can write pure CSS3 Transitions triggered by `:hover` and `:focus` pseudo-classes. In older browsers, the CSS will be translated to jQuery animations, provided that your CSS conforms to simple rules described below.
+
+jquery.transition.js
+====================
 
 How to use it?
 --------------
@@ -47,6 +53,31 @@ When should I use it?
 ---------------------
 
 In any case, it is a good practice to test animations both with and without the plugin to see if the benefit is real.
+
+jquery.hoverTransition.js
+=========================
+
+How to use it?
+--------------
+
+The plugin first has to be loaded in the page.
+Then the css part of the transition has to be written. Example:
+
+    #menu li {
+      padding-left: 0;
+      -moz-transition: padding-left 500ms;
+      -webkit-transition: padding-left 500ms;
+      -o-transition: padding-left 500ms;
+      -ms-transition: padding-left 500ms;
+      transition-property: padding-left;
+      transition-duration: 500ms;
+    }
+    
+    #menu li:hover {
+      padding-left: 20px;
+    }
+
+The previous CSS will produce animations working both in CSS3 Transitions compatible and incompatible browsers.
 
 Author
 ------
