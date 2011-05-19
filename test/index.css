@@ -1,9 +1,9 @@
-.test {
-	opacity: 1;
-	-moz-transition-property: all;
-	-webkit-transition-property: all;
-	-o-transition-property: all;
-	-ms-transition-property: all;
+#test0, #test1 li, #test2 li b, .test3, .test4 b {
+	font-size: 12px;
+	-moz-transition: font-size;
+	-webkit-transition: font-size;
+	-o-transition: font-size;
+	-ms-transition: font-size;
 }
 
 /* Following are all the selectors hoverTransition is tested against.
