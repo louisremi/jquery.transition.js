@@ -121,12 +121,16 @@ if ( !supportTransition || $.hoverTransition.test ) {
 					delegate = typeof split != "string" ? split[1] : split;
 
 					// mouseenter and focus listeners
-					$(listener).delegate( delegate, hfEvents[0].join(" "), function() {
-						var $animated = animated ? $(this).find(animated) : $(this),
+					$(listener).delegate( delegate, hfEvents[0].join(" "), {a: animated, p: props}, function( e ) {
+						var $animated = e.data.a ? $(this).find(e.data.a) : $(this),
 							prop, save = {};
+						// exit immediatly if nothing is to be animated
+						if ( !$animated.length ) {
+							return;
+						}
 						// Save the initial style of the elements to be animated
 						if ( !$.data( this, "initStyle" ) ) {
-							for ( prop in props ) {
+							for ( prop in e.data.p ) {
 								save[prop] = $.css( $animated[0], prop );
 							}
 							$.data( this, "initStyle", save );
@@ -134,10 +138,14 @@ if ( !supportTransition || $.hoverTransition.test ) {
 						$animated.stop(true).animate( props );
 
 					// mouseleave and blur listeners
-					}).delegate( delegate, hfEvents[1].join(" "), function() {
+					}).delegate( delegate, hfEvents[1].join(" "), {a: animated}, function( e ) {
 						var self = this,
 							init = $.data( this, "initStyle" ),
-							$animated = animated ? $(this).find(animated) : $(this);
+							$animated = e.data.a ? $(this).find(e.data.a) : $(this);
+						// exit immediatly if nothing is to be animated
+						if ( !$animated.length ) {
+							return;
+						}
 						if ( init ) {
 							$animated
 								.stop(true).animate( init )

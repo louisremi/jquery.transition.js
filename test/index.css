@@ -13,45 +13,45 @@
 
 /* #id:pseudo */
 #test0 {
-	transition-property: all;
+	transition-property: font-size;
 }
 
 #test0:hover {
-	opacity: .2;
+	font-size: 2em;
 }
 
 /* #id .class:pseudo */
 #test1 li {
-	transition-property: all;
+	transition-property: font-size;
 }
 
 #test1 li:hover {
-	opacity: .2;
+	font-size: 2em;
 }
 
 /* #id .class:pseudo .class */
 #test2 li b {
-	transition-property: all;
+	transition-property: font-size;
 }
 
 #test2 li:hover b {
-	opacity: .2;
+	font-size: 2em;
 }
 
 /* .class:pseudo */
 .test3 {
-	transition-property: all;
+	transition-property: font-size;
 }
 
 .test3:hover {
-	opacity: .2;
+	font-size: 2em;
 }
 
 /* .class:pseudo .class */
 .test4 b {
-	transition-property: all;
+	transition-property: font-size;
 }
 
 .test4:hover b {
-	opacity: .2;
+	font-size: 2em;
 }

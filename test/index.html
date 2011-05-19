@@ -1,36 +1,44 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="fr" lang="fr">
+<!DOCTYPE html>
+<html>
 
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <link rel="stylesheet" href="styles.css" />
-    <title>Menu de navigation et transitions</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="index.css" />
+    <title>jQuery.autoTransition.js Tests</title>
   </head>
-
 
   <body>
   	
-  	<h1>CSS3 Transitions on navigation</h1>
+  	<h1>jQuery.autoTransition.js Tests</h1>
   	
-    <ul class="menu"> 
-	    <li><a href="#">Choucroute</a></li> 
-	    <li><a href="#">Bière</a></li> 
-	    <li><a href="#">Knack</a></li> 
-	    <li><a href="#">Hopla</a></li>  
-	    <li><a href="#">Kuglopf</a></li> 
-	</ul> 
+    <p id="test0">#id:pseudo</p>
+    
+    <ul id="test1">
+    	<li>#id .class:pseudo</li>
+    	<li>#id .class:pseudo</li>
+    	<li>#id .class:pseudo</li>
+    </ul>
+    
+    <ul id="test2">
+    	<li>#id <b>.class</b>:pseudo <b>.class</b></li>
+    	<li>#id <b>.class</b>:pseudo <b>.class</b></li>
+    	<li>#id <b>.class</b>:pseudo <b>.class</b></li>
+    </ul>
+    
+    <ul>
+    	<li class="test3">.class:pseudo</li>
+    	<li class="test3">.class:pseudo</li>
+    	<li class="test3">.class:pseudo</li>
+    </ul>
+    
+    <ul>
+    	<li class="test4">.class:pseudo <b>.class</b></li>
+    	<li class="test4">.class:pseudo <b>.class</b></li>
+    	<li class="test4">.class:pseudo <b>.class</b></li>
+    </ul>
   </body>
   
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.js" type="text/javascript"></script>
-  <script>
-    $.hoverTransition = {test: true};
-  </script>
-  <script src="../jquery.hoverTransition.js" type="text/javascript"></script>
-  <script>
-  	$(".menu a").css({
-  		MozTransitionProperty: "none",
-  		WebkitTransitionProperty: "none"
-  	});
-  </script>
-
+  <script src="../jquery.autoTransition.js" type="text/javascript"></script>
 </html>
