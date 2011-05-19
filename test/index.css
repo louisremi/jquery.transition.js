@@ -1,9 +1,9 @@
 #test0, #test1 li, #test2 li b, .test3, .test4 b {
 	font-size: 12px;
-	-moz-transition: font-size;
-	-webkit-transition: font-size;
-	-o-transition: font-size;
-	-ms-transition: font-size;
+	-moz-transition: font-size 600ms;
+	-webkit-transition: font-size 600ms;
+	-o-transition: font-size 600ms;
+	-ms-transition: font-size 600ms;
 }
 
 /* Following are all the selectors hoverTransition is tested against.
