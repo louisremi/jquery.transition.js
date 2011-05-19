@@ -1,10 +1,15 @@
 /* Another polyfill for CSS3 Transitions.
  * This one parses a stylesheet looking for transitions happening on :hover and :focus and convert them to jQuery code.
- * 
+ *
  * Limitations:
- * - Only works for a limited set of selectors
- * - Only works when the rule containing the transition property list and the rule declaring the :hover style have similar selectors
- * - Doesn't work with "transition-property: all;"
+ * - Use simple and coherent selectors (#menu li` to declare the transition and `#menu li:hover` for the target style)
+ * - Detail the transition properties (`transition-property: padding-left, ...` instead of `transition: all`)
+ *
+ * Complete documentation and latest version available at https://github.com/louisremi/jquery.transition.js
+ *
+ * License: MIT or GPL
+ *
+ * Author: @louis_remi
  */
 (function($, window, document, undefined) {
 
