@@ -1,0 +1,33 @@
+body {
+	padding: 0 50px;
+	background:#F1EFE2;
+	font-size: 1.4em;
+	}
+h1 {
+	margin-top: 20px;
+	margin-bottom: 60px;
+	color: #567;
+}
+
+.menu li {
+	list-style: none;
+}
+.menu a { 		
+	display: inline-block;
+	
+	padding: 8px 12px;
+    text-shadow: 0px 0px 6px #777; 
+    background: #98B924; 
+    border: 2px solid #fff;
+	color: #fff;
+	text-decoration: none;
+	-webkit-transition: all .5s;
+    -moz-transition: all .5s;
+    -o-transition: all .5s;
+  transition-duration: .5s;
+  transition-property: padding-right;
+}
+.menu a:hover, .menu a:focus {
+	padding-right: 150px;
+	background: #b8da40;
+}

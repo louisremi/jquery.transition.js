@@ -35,8 +35,6 @@ jQuery.support.transition =
 	'Moz'+trans in divStyle ? 'Moz'+trans:
 	'Webkit'+trans in divStyle ? 'Webkit'+trans:
 	false;
-// prevent IE memory leak;
-div = divStyle = null;
 
 jQuery.fn.extend({
 	/*show: function( speed, easing, callback ) {
