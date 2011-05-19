@@ -1,5 +1,5 @@
 /* Another polyfill for CSS3 Transitions.
- * This one parses a stylesheet looking for transitions happening on :hover, :focus (and :target in the near future) and convert them to jQuery code.
+ * This one parses a stylesheet looking for transitions happening on :hover and :focus and convert them to jQuery code.
  * 
  * Limitations:
  * - Only works for a limited set of selectors
@@ -33,6 +33,7 @@ while ( i-- ) {
 		continue;
 	}
 }
+
 if ( !supportTransition || $.hoverTransition.test ) {
 	$(function() {
 		var docSS = document.styleSheets,
@@ -42,12 +43,14 @@ if ( !supportTransition || $.hoverTransition.test ) {
 			transitionSelector = {}, pseudoSelector = {},
 			split, pseudo,
 			selector;
+
 		// Loop through all stylesheets
 		while ( i-- ) {
 			// if the stylesheet gives us security issues and is readOnly, exit here
 			//if ( docSS[i].readOnly ) { continue };
 			rules = docSS[i].rules || docSS[i].cssRules;
 			j = rules.length;
+
 			// Loop through all rules
 			while ( j-- ) {
 				curRule = rules[j];
@@ -60,6 +63,7 @@ if ( !supportTransition || $.hoverTransition.test ) {
 					0;
 				selectors = curSelectorText.split(",");
 				k = selectors.length;
+
 				// Loop through all the selectors of the current rule
 				while ( k-- ) {
 					curSelector = $.trim( selectors[k] );
@@ -82,6 +86,7 @@ if ( !supportTransition || $.hoverTransition.test ) {
 				}
 			}
 		}
+
 		// Match selectors of rules containing transitions,
 		// and selectors with :hover, :focus or :target pseudo-class.
 		// Only looking for exact match!
@@ -104,7 +109,7 @@ if ( !supportTransition || $.hoverTransition.test ) {
 							return letter.toUpperCase();
 						})];
 				}
-				
+
 				if ( ~pseudo.indexOf(":hover") && ( hfEvents[0].push("mouseenter"), hfEvents[1].push("mouseleave") ) 
 					|| ~pseudo.indexOf(":focus") && ( hfEvents[0].push("focus"), hfEvents[1].push("blur") )
 				) {
@@ -114,7 +119,8 @@ if ( !supportTransition || $.hoverTransition.test ) {
 						// use the body otherwise
 						document.body;
 					delegate = typeof split != "string" ? split[1] : split;
-					
+
+					// mouseenter and focus listeners
 					$(listener).delegate( delegate, hfEvents[0].join(" "), function() {
 						var $animated = animated ? $(this).find(animated) : $(this),
 							prop, save = {};
@@ -127,6 +133,7 @@ if ( !supportTransition || $.hoverTransition.test ) {
 						}
 						$animated.stop(true).animate( props );
 
+					// mouseleave and blur listeners
 					}).delegate( delegate, hfEvents[1].join(" "), function() {
 						var self = this,
 							init = $.data( this, "initStyle" ),
