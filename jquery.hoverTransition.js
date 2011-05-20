@@ -101,13 +101,10 @@ if ( !supportTransition || $.hoverTransition.test ) {
 								pseudo: pseudo,
 								style: curRule.style,
 								selector: split[0],
-								animated: split[1]
+								animated: split[1],
+								id: [i, j]
 							}
 					}
-				}
-				// remove the rule from the CSS to fix a race condition in IE9
-				if ( split.length > 1 ) {
-					docSS[i].removeRule(j);
 				}
 			}
 		}
@@ -116,7 +113,7 @@ if ( !supportTransition || $.hoverTransition.test ) {
 		// and selectors with :hover, :focus or :target pseudo-class.
 		// Only looking for exact match!
 		var listener, delegate, animated, style,
-			properties, temp,
+			properties, temp, id,
 			props = {},
 			hfEvents = [[], []];
 		for ( selector in pseudoSelector ) {
@@ -125,6 +122,7 @@ if ( !supportTransition || $.hoverTransition.test ) {
 				pseudo = temp.pseudo;
 				animated = temp.animated;
 				split = temp.selector;
+				id = temp.id;
 
 				properties = transition.properties;
 				duration = transition.duration;
@@ -136,6 +134,9 @@ if ( !supportTransition || $.hoverTransition.test ) {
 							return letter.toUpperCase();
 						})];
 				}
+
+				// remove the rule from the CSS to fix a race condition in IE9
+				docSS[id[0]].removeRule(id[1]);
 
 				if ( ~pseudo.indexOf(":hover") && ( hfEvents[0].push("mouseenter"), hfEvents[1].push("mouseleave") ) 
 					|| ~pseudo.indexOf(":focus") && ( hfEvents[0].push("focus"), hfEvents[1].push("blur") )
