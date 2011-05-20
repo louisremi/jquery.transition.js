@@ -32,7 +32,12 @@ h1 {
 	top: 500px;
 }
 
-#footer p {
+#footer p, #footer ol, #footer h2 {
 	width: 900px;
 	margin: 0 auto;
+}
+
+#footer ol {
+	margin: 20px auto;
+	padding-left: 3em;
 }
