@@ -1,57 +1,38 @@
-#test0, #test1 li, #test2 li b, .test3, .test4 b {
-	font-size: 12px;
-	-moz-transition: font-size 600ms;
-	-webkit-transition: font-size 600ms;
-	-o-transition: font-size 600ms;
-	-ms-transition: font-size 600ms;
+body {
+	background: url('pattern_trans.png');
+	background-color: #555;
+	text-shadow: 1px 1px 0 #777;
+	color: #088;
 }
 
-/* Following are all the selectors hoverTransition is tested against.
- * Other selectors are considered risky (and inneficient anyway) as they might not work.
- * Additional selectors might be added if the need arise.
- */
-
-/* #id:pseudo */
-#test0 {
-	transition-property: font-size;
+h1 {
+	font-size: 4em;
+	text-align: center;
+	margin-top: 100px;
 }
 
-#test0:hover {
-	font-size: 2em;
+#menu {
+	width: 600px;
+	margin: 100px auto;
+}
+#menu li {
+	padding: 0;
+	position: relative;
+	display: inline-block;
+	font-size: 2.7em;
+	width: 145px;
+	text-align: center;
+	text-decoration: underline;
 }
 
-/* #id .class:pseudo */
-#test1 li {
-	transition-property: font-size;
+#footer {
+	position: absolute;
+	width: 100%;
+	font-size: 1.4em;
+	top: 500px;
 }
 
-#test1 li:hover {
-	font-size: 2em;
-}
-
-/* #id .class:pseudo .class */
-#test2 li b {
-	transition-property: font-size;
-}
-
-#test2 li:hover b {
-	font-size: 2em;
-}
-
-/* .class:pseudo */
-.test3 {
-	transition-property: font-size;
-}
-
-.test3:hover {
-	font-size: 2em;
-}
-
-/* .class:pseudo .class */
-.test4 b {
-	transition-property: font-size;
-}
-
-.test4:hover b {
-	font-size: 2em;
+#footer p {
+	width: 900px;
+	margin: 0 auto;
 }

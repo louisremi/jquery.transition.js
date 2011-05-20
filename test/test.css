@@ -1,0 +1,57 @@
+#test0, #test1 li, #test2 li b, .test3, .test4 b {
+	font-size: 12px;
+	-moz-transition: font-size 600ms;
+	-webkit-transition: font-size 600ms;
+	-o-transition: font-size 600ms;
+	-ms-transition: font-size 600ms;
+}
+
+/* Following are all the selectors hoverTransition is tested against.
+ * Other selectors are considered risky (and inneficient anyway) as they might not work.
+ * Additional selectors might be added if the need arise.
+ */
+
+/* #id:pseudo */
+#test0 {
+	transition-property: font-size;
+}
+
+#test0:hover {
+	font-size: 2em;
+}
+
+/* #id .class:pseudo */
+#test1 li {
+	transition-property: font-size;
+}
+
+#test1 li:hover {
+	font-size: 2em;
+}
+
+/* #id .class:pseudo .class */
+#test2 li b {
+	transition-property: font-size;
+}
+
+#test2 li:hover b {
+	font-size: 2em;
+}
+
+/* .class:pseudo */
+.test3 {
+	transition-property: font-size;
+}
+
+.test3:hover {
+	font-size: 2em;
+}
+
+/* .class:pseudo .class */
+.test4 b {
+	transition-property: font-size;
+}
+
+.test4:hover b {
+	font-size: 2em;
+}

@@ -2,7 +2,7 @@
  * This one parses a stylesheet looking for transitions happening on :hover and :focus and convert them to jQuery code.
  *
  * Limitations:
- * - Use simple and coherent selectors (#menu li` to declare the transition and `#menu li:hover` for the target style)
+ * - Use simple and coherent selectors (`#menu li` to declare the transition and `#menu li:hover` for the target style)
  * - Detail the transition properties (`transition-property: padding-left, ...` instead of `transition: all`)
  *
  * Complete documentation and latest version available at https://github.com/louisremi/jquery.transition.js
@@ -44,6 +44,7 @@ if ( !supportTransition || $.hoverTransition.test ) {
 		var docSS = document.styleSheets,
 			i = docSS.length,
 			rules, j, curRule, curSelectorText,
+			duration,
 			transition, selectors, k, curSelector,
 			transitionSelector = {}, pseudoSelector = {},
 			split, pseudo,
@@ -61,13 +62,15 @@ if ( !supportTransition || $.hoverTransition.test ) {
 				curRule = rules[j];
 				curSelectorText = curRule.selectorText;
 				// Search for a transition property list
-				transition = curRule.style.transition || curRule.style["transition-property"];
+				transition = curRule.style["transition-property"];
 				// Turn a list of transition properties into a hash of properties
 				transition = transition ?
-					transition.replace(/(^|,)\s*([\w-]*)[^,]*/g, "$1$2").split():
+					transition.replace(/(^|,)\s*([\w-]*)[^,]*/g, "$1$2").split(","):
 					0;
 				selectors = curSelectorText.split(",");
 				k = selectors.length;
+
+				duration = curRule.style["transition-duration"];
 
 				// Loop through all the selectors of the current rule
 				while ( k-- ) {
@@ -83,7 +86,7 @@ if ( !supportTransition || $.hoverTransition.test ) {
 						~curSelector.indexOf(":target")? ":target": ","
 					);
 					if ( split.length > 1 ) {
-						// store selectors at the same place when when they exist for both :hover and :focus
+						// store selectors at the same place when they exist for both :hover and :focus
 						(pseudo == ":hover" || pseudo == ":focus") && pseudoSelector[split.join("")] ?
 							pseudoSelector[split.join("")][0] += " " + pseudo:
 							pseudoSelector[split.join("")] = [pseudo, curRule.style, split[0], split[1]];
