@@ -88,7 +88,7 @@ The successfully parse and translate your CSS, the plugin requires that you conf
 - Detail the transition properties (`transition-property: padding-left, ...` instead of `transition: all`)
 
 Those rules can be considered *best practices*, sticking to them will help you write efficient and readable CSS code.
-A detailed list of rules follows.
+A detailed list of rules follows, if the animation doesn't work in IE, it would be well advised to read it carefully before reporting a bug.
 
 When is the jQuery fallback used?
 ---------------------------------
@@ -123,7 +123,7 @@ Detailed limitations of jquery.hoverTransition.js
 -------------------------------------------------
 
 - As the name suggests, this plugin can only translate transitions that are thriggered by :hover (as well as :focus) pseudo classes
-- The set of selectors you can use to define your animation is [limited to][]:
+- The set of selectors you can use to define your animation is limited to*:
   - `#<id>:[hover|focus]` example: `#id:hover`
   - `#<id> [.<className>|<nodeName>]:[hover|focus]` examples: `#id .class:hover` or `#id li:hover`
   - `#<id> [.<className>|<nodeName>]:[hover|focus] [.<className>|<nodeName>]` examples: `#id .class:hover b` or `#id li:hover b`
@@ -137,5 +137,6 @@ Detailed limitations of jquery.hoverTransition.js
   - bad: `transition: all 500ms`
 - Only a single value can be used for `transition-duration`
 - `transition-delay` and `transition-timing-function` are not implemented yet.
+- the CSS properties jQuery is able to animate is limited. You might have to add [cssHooks](https://github.com/brandonaaron/jquery-cssHooks) to your pages to animate properties such as colors and Transforms
 
-[limited to]: Other selectors might work but are not tested and can be considered inneficients.
+*Other selectors might work but are not tested and can be considered inneficients.

@@ -70,14 +70,22 @@ if ( !supportTransition || $.hoverTransition.test ) {
 				selectors = curSelectorText.split(",");
 				k = selectors.length;
 
-				duration = curRule.style["transition-duration"];
+				if ( transition ) {
+					duration = curRule.style["transition-duration"];
+					if ( duration ) {
+						duration = parseInt( duration, 10 ) * ( ~duration.indexOf("ms") ? 1 : 100 );
+					}
+				}
 
 				// Loop through all the selectors of the current rule
 				while ( k-- ) {
 					curSelector = $.trim( selectors[k] );
 					// If there is a transition in the current rule, add its selector to the transitionSelector list
 					if ( transition ) {
-						transitionSelector[curSelector] = transition;
+						transitionSelector[curSelector] = {
+							properties: transition,
+							duration: duration
+						};
 					}
 					// If there is a :hover, :focus or :target pseudo-class in the selector, add it to the listeners list
 					split = curSelector.split( pseudo =
@@ -88,8 +96,13 @@ if ( !supportTransition || $.hoverTransition.test ) {
 					if ( split.length > 1 ) {
 						// store selectors at the same place when they exist for both :hover and :focus
 						(pseudo == ":hover" || pseudo == ":focus") && pseudoSelector[split.join("")] ?
-							pseudoSelector[split.join("")][0] += " " + pseudo:
-							pseudoSelector[split.join("")] = [pseudo, curRule.style, split[0], split[1]];
+							pseudoSelector[split.join("")].pseudo += " " + pseudo:
+							pseudoSelector[split.join("")] = {
+								pseudo: pseudo,
+								style: curRule.style,
+								selector: split[0],
+								animated: split[1]
+							}
 					}
 				}
 			}
@@ -99,21 +112,23 @@ if ( !supportTransition || $.hoverTransition.test ) {
 		// and selectors with :hover, :focus or :target pseudo-class.
 		// Only looking for exact match!
 		var listener, delegate, animated, style,
+			properties, temp,
 			props = {},
 			hfEvents = [[], []];
 		for ( selector in pseudoSelector ) {
 			if ( ( transition = transitionSelector[selector] ) ) {
-				split = pseudoSelector[selector];
-				pseudo = split[0];
-				style = split[1];
-				animated = split[3]
-				split = split[2];
+				temp = pseudoSelector[selector];
+				pseudo = temp.pseudo;
+				animated = temp.animated;
+				split = temp.selector;
 
-				i = transition.length;
+				properties = transition.properties;
+				duration = transition.duration;
+				i = properties.length;
 				while ( i-- ) {
-					props[transition[i]] =
+					props[properties[i]] =
 						// use camelCase property name
-						style[transition[i].replace(/-([a-z])/g, function( all, letter ) {
+						temp.style[properties[i].replace(/-([a-z])/g, function( all, letter ) {
 							return letter.toUpperCase();
 						})];
 				}
@@ -129,7 +144,7 @@ if ( !supportTransition || $.hoverTransition.test ) {
 					delegate = typeof split != "string" ? split[1] : split;
 
 					// mouseenter and focus listeners
-					$(listener).delegate( delegate, hfEvents[0].join(" "), {a: animated, p: props}, function( e ) {
+					$(listener).delegate( delegate, hfEvents[0].join(" "), {a: animated, p: props, d: duration}, function( e ) {
 						var $animated = e.data.a ? $(this).find(e.data.a) : $(this),
 							prop, save = {};
 						// exit immediatly if nothing is to be animated
@@ -143,10 +158,10 @@ if ( !supportTransition || $.hoverTransition.test ) {
 							}
 							$.data( this, "initStyle", save );
 						}
-						$animated.stop(true).animate( props );
+						$animated.stop(true).animate( props, e.data.d );
 
 					// mouseleave and blur listeners
-					}).delegate( delegate, hfEvents[1].join(" "), {a: animated}, function( e ) {
+					}).delegate( delegate, hfEvents[1].join(" "), {a: animated, d: duration}, function( e ) {
 						var self = this,
 							init = $.data( this, "initStyle" ),
 							$animated = e.data.a ? $(this).find(e.data.a) : $(this);
@@ -156,7 +171,7 @@ if ( !supportTransition || $.hoverTransition.test ) {
 						}
 						if ( init ) {
 							$animated
-								.stop(true).animate( init )
+								.stop(true).animate( init, e.data.d )
 								// Clear the saved style at the end of the animation
 								.queue(function() {
 									$.data( self, "initStyle", null );
