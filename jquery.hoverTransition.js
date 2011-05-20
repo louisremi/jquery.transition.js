@@ -105,6 +105,10 @@ if ( !supportTransition || $.hoverTransition.test ) {
 							}
 					}
 				}
+				// remove the rule from the CSS to fix a race condition in IE9
+				if ( split.length > 1 ) {
+					docSS[i].removeRule(j);
+				}
 			}
 		}
 
