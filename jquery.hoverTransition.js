@@ -114,8 +114,8 @@ if ( !supportTransition || $.hoverTransition.test ) {
 		// Only looking for exact match!
 		var listener, delegate, animated, style,
 			properties, temp, id,
-			props = {},
-			hfEvents = [[], []];
+			props,
+			hfEvents;
 		for ( selector in pseudoSelector ) {
 			if ( ( transition = transitionSelector[selector] ) ) {
 				temp = pseudoSelector[selector];
@@ -126,6 +126,7 @@ if ( !supportTransition || $.hoverTransition.test ) {
 
 				properties = transition.properties;
 				duration = transition.duration;
+				props = {};
 				i = properties.length;
 				while ( i-- ) {
 					props[properties[i]] =
@@ -138,6 +139,7 @@ if ( !supportTransition || $.hoverTransition.test ) {
 				// remove the rule from the CSS to fix a race condition in IE9
 				docSS[id[0]].removeRule(id[1]);
 
+				hfEvents = [[], []];
 				if ( ~pseudo.indexOf(":hover") && ( hfEvents[0].push("mouseenter"), hfEvents[1].push("mouseleave") ) 
 					|| ~pseudo.indexOf(":focus") && ( hfEvents[0].push("focus"), hfEvents[1].push("blur") )
 				) {
