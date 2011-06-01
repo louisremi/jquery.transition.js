@@ -73,7 +73,7 @@ if ( !supportTransition || $.hoverTransition.test ) {
 				if ( transition ) {
 					duration = curRule.style["transition-duration"];
 					if ( duration ) {
-						duration = parseInt( duration, 10 ) * ( ~duration.indexOf("ms") ? 1 : 100 );
+						duration = parseFloat( duration ) * ( ~duration.indexOf("ms") ? 1 : 1000 );
 					}
 				}
 
