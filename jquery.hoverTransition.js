@@ -39,7 +39,7 @@ while ( i-- ) {
 	}
 }
 
-if ( !supportTransition || $.hoverTransition.test ) {
+if ( !supportTransition ) {
 	$(function() {
 		var docSS = document.styleSheets,
 			i = docSS.length,

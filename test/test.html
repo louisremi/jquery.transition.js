@@ -37,8 +37,19 @@
     	<li class="test4">.class:pseudo <b>.class</b></li>
     	<li class="test4">.class:pseudo <b>.class</b></li>
     </ul>
+
+    <br/><br/>
+    <p id="trans">
+    	Hello World!
+    </p>
   </body>
   
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.js" type="text/javascript"></script>
   <script src="../jquery.hoverTransition.js" type="text/javascript"></script>
+  <script src="../jquery.transition.min.js" type="text/javascript"></script>
+  <script>
+  	$(function() {
+  		$("#trans").animate({fontSize: 20}).animate({fontSize: 12});
+  	});
+  </script>
 </html>
