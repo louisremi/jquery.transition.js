@@ -1,0 +1,136 @@
+/*
+ * Oh, please don't look at his code, it's such a mess...
+ */
+body {
+	background: #333;
+	color: white;
+	width: 800px;
+	margin: 0 auto;
+	font-family: "Times New Roman", "Liberation Serif", serif;
+	font-size: 14px;
+}
+
+#squares {
+	display: block;
+	height: 300px;
+}
+
+.square {
+	display: inline-block;
+	position: relative;
+	width: 33px;
+	height: 38px;
+	margin: 10px;
+	font-size: 42px;
+	font-family: "Courier New", "Liberation Mono", monospace;
+	padding-left: 7px;
+	padding-top: 2px;
+}
+
+#why p {
+	line-height: 1.2em;
+	width: 600px;
+}
+
+pre, code {
+	font-family: "Courier New", "Liberation Mono", monospace;
+}
+
+a {
+	color: white;
+}
+
+p.action {
+	font-style: italic;
+	margin: -5px 0 12px 0;
+}
+
+.expect {
+	margin-top: 50px;
+}
+
+h2,h3 {
+	font-family: 'Raleway', arial, serif !important;
+	text-shadow: 1px 1px 1px #000;
+}
+
+.when {
+	font-size: 60px;
+}
+
+h2.when {
+	font-size: 45px;
+}
+
+.fails, .works {
+	font-style: italic;
+	font-weight: bold;
+}
+
+p {
+	margin-top: 8px;
+}
+
+a > pre {
+	max-height: 0;
+	overflow: hidden !important;
+	-moz-transition-duration: 800ms;
+	-moz-transition-property: max-height;
+	-webkit-transition-duration: 800ms;
+	-webkit-transition-property: max-height;
+	-o-transition-duration: 800ms;
+	-o-transition-property: max-height;
+}
+
+a:hover > pre {
+	max-height: 500px;
+}
+
+.how {
+	font-size: 10px;
+	cursor: pointer;
+	display: inline;
+}
+
+.bug {
+	float: right;
+	margin-top: -5.5em;
+}
+
+#disqus {
+	margin-top: 80px;
+}
+
+/*
+ * Prettify
+ */
+/* Pretty printing styles. Used with prettify.js. */
+
+/* SPAN elements with the classes below are added by prettyprint. */
+.str { color: #BFAC00; }
+.kwd, .typ { color: #BF5600; }
+.com { color: #111; }
+.lit { color: #26BF00; }
+.pun, .opn, .clo { color: #999; }
+.pln { color: #DDD; }
+.tag { color: #008; }
+.atn { color: #606; }
+.atv { color: #080; }
+.dec { color: #606; }
+
+/* Specify class=linenums on a pre to get line numbering */
+ol.linenums { margin-top: 0; margin-bottom: 0 } /* IE indents via margin-left */
+li.L0,
+li.L1,
+li.L2,
+li.L3,
+li.L5,
+li.L6,
+li.L7,
+li.L8 { list-style-type: none }
+/* Alternate shading for lines */
+li.L1,
+li.L3,
+li.L5,
+li.L7,
+li.L9 { background: #eee }

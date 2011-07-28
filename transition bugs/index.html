@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>CSS3 transition tests and discussion</title>
+	<link rel="stylesheet" href="reset.css" />
+  <link href='http://fonts.googleapis.com/css?family=Raleway:100' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="style.css" />
+
+</head>
+<body onload="go()">
+	<section id="squares">
+		<div class="square" id="test0" style="background:#bf0000">T</div>
+		<div class="square" id="test1" style="background:#bf5600">R</div>
+		<div class="square" id="test2" style="background:#bfac00">A</div>
+		<div class="square" id="test3" style="background:#7cbf00">N</div>
+		<div class="square" id="test4" style="background:#26bf00">S</div>
+		<div class="square" id="test5" style="background:#00bf2f">I</div>
+		<div class="square" id="test6" style="background:#00bf85">T</div>
+		<div class="square" id="test7" style="background:#00a2bf">I</div>
+		<div class="square" id="test8" style="background:#004cbf">O</div>
+		<div class="square" id="test9" style="background:#0900bf">N</div>
+		<div class="square" id="test10" style="background:#5f00bf">S</div>
+		<div class="square" id="test11" style="background:#b500bf">!</div>
+	</section>
+	<section id="why">
+		<h2 class="when">What is this page about?</h2>
+		<p>
+			The <a href="http://www.w3.org/TR/2009/WD-css3-transitions-20090320/">CSS3 Transition spec</a> (actually a working draft)
+			hasn't yet answered to the question "What should happen when a value is changed midway through a transition?".
+			Now that Firefox is joining Chrome, Safari and Opera in supporting this animation mechanism, it might be a good time to express our opinion.
+		</p>
+		<p>
+			Looking at animation features of javascript libraries,
+			I expect to be able to prematurely stop or complete an animation and have the callback be executed immediatly, using transitions too!<br/>
+			Following is a list of expecations and tests of browser behavior to start with.
+			Test cases have also been built for bugs found along the way.
+		</p>
+		<p>
+			Have a look, and join the <a href="#disqus">discussion</a>!
+		</p>
+		<!--<p>
+			In an ideal world; where browser vendors would read in my mind, agree with me and produce bug-free software; 
+			you would see the letters T R A N S I T I O N S line up at the top of this page. Yep, kind of like an ACID test.
+			For now, consider it to be "art".
+		</p>-->
+		<!--<p>
+			Other bugs not tested here yet:
+			- Zoom in/out in Webkit and see what happens
+		</p>-->
+	</section>
+	<section id="expectations">
+		<div class="expect" id="_test0">
+			<h3 class="when" style="color:#bf0000">When...</h3>
+			<p class="action">...creating a transition using javascript,</p>
+			<p>I expect the transition to happen.</p>
+			<p>In your browser it <strong class="result"></strong></p>
+			<a class="code">
+				<p class="how">How?</p>
+				<pre class="prettyprint lang-js"></pre>
+			</a>
+			<script type="text/test">var $test0 = $('test0');
+$test0.style[transition + 'Duration'] = '2000ms';
+$test0.style[transition + 'TimingFunction'] = 'linear';
+$test0.style[transition + 'Property'] = transformProp;
+$test0.style[transform] = 'translateY(200px) rotate('+(6*Math.PI)+'rad)';
+
+// Is the transition running? 
+test($test0, function() {
+  // test whether the current transform value is between initial and final values
+  var computedTransform = getComputedStyle($test0)[transform];
+  return !/ 0\)/.test(computedTransform) && !/ 200(px)?\)/.test(computedTransform);
+// fail callback
+}, false, function() {
+	$test0.style[transform] = 'translateY(200px) rotate('+(1*Math.PI)+'rad)';
+}, 100);</script>
+		</div>
+		
+		<script type="text/test">
+			/*
+			 * Fix to make transition work in Opera
+			 */
+			var style = document.createElement('style');
+			style.innerHTML = ".square { -o-transition-duration: 0s; }";
+			document.head.appendChild(style);
+			// Forces Opera to take the duration into account immediatly
+			getComputedStyle(style)[transition + 'Duration'];
+		</script>
+		
+		<div class="expect" id="_test1">
+			<h3 class="when" style="color:#bf5600">When...</h3>
+			<p class="action">...the transition is complete,</p>
+			<p>I expect the <code>transitionend</code> event to fire.</p>
+			<p>In your browser it <strong class="result"></strong></p>
+			<a class="code">
+				<p class="how">How?</p>
+				<pre class="prettyprint lang-js"></pre>
+			</a>
+			<script type="text/test">var $test1 = $('test1');
+$test1.style[transition + 'Duration'] = '1000ms';
+$test1.style[transition + 'TimingFunction'] = 'linear';
+$test1.style[transition + 'Property'] = transformProp;
+$test1.addEventListener( transitionend, function() {
+  $test1.style[transform] = 'translateY(200px) rotate('+(6*Math.PI)+'rad)';
+  // The test will pass as long as the callback fires
+  test($test1, function() {
+    return true;
+  });
+}, false);
+$test1.style[transform] = 'translateY(100px) rotate('+(3*Math.PI)+'rad)';</script>
+		</div>
+		
+		<div class="expect" id="_test2">
+			<h3 class="when" style="color:#bfac00">When...</h3>
+			<p class="action">...setting the duration to <code>0</code> during a transition,</p>
+			<p>I expect the transition to complete immediatly.</p>
+			<p>In your browser it <strong class="result"></strong></p>
+			<a class="code">
+				<p class="how">How?</p>
+				<pre class="prettyprint lang-js"></pre>
+			</a>
+			<script type="text/test">var $test2 = $('test2');
+$test2.style[transition + 'Duration'] = '2000ms';
+$test2.style[transition + 'TimingFunction'] = 'linear';
+$test2.style[transition + 'Property'] = transformProp;
+$test2.style[transform] = 'translateY(200px) rotate('+(6*Math.PI)+'rad)';
+
+// Change the duration to '0s' after a 800ms delay
+setTimeout(function() {
+  $test2.style[transition + 'Duration'] = '0s';
+
+  // Is the transform already complete? 
+  test($test2, function() {
+    return / 200(px)?\)/.test(getComputedStyle($test2)[transform]);
+  // fail callback
+  }, false, function() {
+    $test2.style[transform] = getComputedStyle($test2)[transform];
+  });
+}, 800);</script>
+		</div>
+		
+		<div class="expect" id="_test3">
+			<h3 class="when" style="color:#7cbf00">When...</h3>
+			<p class="action">...setting the transition property list to <code>none</code> during a transition,</p>
+			<p>I expect the transition to complete immediatly.</p>
+			<p>In your browser it <strong class="result"></strong></p>
+			<a class="code">
+				<p class="how">How?</p>
+				<pre class="prettyprint lang-js"></pre>
+			</a>
+			<script type="text/test">var $test3 = $('test3');
+$test3.style[transition + 'Duration'] = '2000ms';
+$test3.style[transition + 'TimingFunction'] = 'linear';
+$test3.style[transition + 'Property'] = transformProp;
+$test3.style[transform] = 'translateY(200px) rotate('+(6*Math.PI)+'rad)';
+
+// Empty the transition-property list after a 1s delay 
+setTimeout(function() {
+  $test3.style[transition + 'Property'] = 'none';
+  
+  // Is the transform already complete?
+  test($test3, function() {
+    return / 200(px)?\)/.test(getComputedStyle($test3)[transform]);
+  // fail callback
+  }, false, function() {
+    $test3.style[transform] = getComputedStyle($test3)[transform];
+  });
+}, 1000);</script>
+		</div>
+		
+		<div class="expect" id="_test4">
+			<h3 class="when" style="color:#00bf2f">When...</h3>
+			<p class="action">...the initial value of an animated property is 'auto'</p>
+			<p>I expect the property to be animated properly.</p>
+			<p>In your browser it <strong class="result"></strong></p>
+			<a class="code">
+				<p class="how">How?</p>
+				<pre class="prettyprint lang-js"></pre>
+			</a>
+			<ul class="bug">
+				<li><a href="https://bugzil.la/571344">bugzil.la/571344</a>
+			</ul>
+			<script type="text/test">var $test4 = $('test4');
+$test4.style[transition + 'Duration'] = '2000ms';
+$test4.style[transition + 'TimingFunction'] = 'linear';
+// Firefox workaround
+//$test4.style.top = getComputedStyle($test4).getPropertyValue('top');
+//getComputedStyle($test4).top;
+$test4.style[transition + 'Property'] = transformProp + ', top';
+$test4.style[transform] = 'rotate('+(3*Math.PI)+'rad)';
+$test4.style.top = '100px';
+
+// Make sure the 'top' value is not immediatly the target value
+test($test4, function() {
+  return getComputedStyle($test4).top != '100px';
+// success callback
+}, function() {
+	$test4.style[transform] = 'rotate('+(6*Math.PI)+'rad)';
+	$test4.style.top = '200px';
+});</script>
+		</div>
+		
+		<div class="expect" id="_test5">
+			<h3 class="when" style="color:#00bf2f">When...</h3>
+			<p class="action">...setting an animated style property to its current computed value,</p>
+			<p>I expect the transition of this property to stop <i>where it is</i>.</p>
+			<p>In your browser it <strong class="result"></strong></p>
+			<a class="code">
+				<p class="how">How?</p>
+				<pre class="prettyprint lang-js"></pre>
+			</a>
+			<script type="text/test">var $test5 = $('test5');
+$test5.style[transition + 'Duration'] = '2000ms';
+$test5.style[transition + 'TimingFunction'] = 'linear';
+$test5.style[transition + 'Property'] = transformProp;
+$test5.style[transform] = 'translateY(200px) rotate('+(6*Math.PI)+'rad)';
+
+// Set the transform value to its current computed value after a 800ms delay
+setTimeout(function() {
+  $test5.style[transform] = getComputedStyle($test5)[transform];
+
+  // Make sure the transition does not reach the final transform value
+  test($test5, function() {
+    return !/ 200(px)?\)/.test(getComputedStyle($test5)[transform]);
+  // success callback
+  }, function() {
+    $test5[transition + 'Duration'] = '1000ms';
+    $test5.style[transform] = 'translateY(200px) rotate('+(6*Math.PI)+'rad)';
+  });
+}, 800);</script>
+		</div>
+		
+		<div class="expect" id="_test6">
+			<h3 class="when" style="color:#00bf85">When...</h3>
+			<p class="action">...the transition of a style property has been stopped <i>where it was</i> and the property list is set to 'none',</p>
+			<p>I expect to be able to modify the style property immediatly.</p>
+			<p>In your browser it <strong class="result"></strong></p>
+			<a class="code">
+				<p class="how">How?</p>
+				<pre class="prettyprint lang-js"></pre>
+			</a>
+			<script type="text/test">var $test6 = $('test6');
+$test6.style[transition + 'Duration'] = '2000ms';
+$test6.style[transition + 'TimingFunction'] = 'linear';
+$test6.style[transition + 'Property'] = transformProp;
+$test6.style[transform] = 'translateY(200px) rotate('+(6*Math.PI)+'rad)';
+
+// Pause the transition after a 1.2s delay and try to restart it immediatly
+setTimeout(function() {
+  $test6.style[transform] = getComputedStyle($test6)[transform];
+  $test6.style[transition + 'Property'] = 'none';
+  $test6.style[transform] = 'translateY(200px) rotate('+(6*Math.PI)+'rad)';
+
+  test($test6, function() {
+    return / 200(px)?\)/.test(getComputedStyle($test6)[transform]);
+  // fail callback
+  }, false, function() {
+    $test6.style[transform] = getComputedStyle($test6)[transform];
+  });
+}, 1200);</script>
+		</div>
+		
+		<div class="expect" id="_test7">
+			<h3 class="when" style="color:#00a2bf">When...</h3>
+			<p class="action">...the transition of a style property has been stopped <i>where it was</i>,</p>
+			<p>I expect the <code>transitionend</code> event to fire immediatly.</p>
+			<p>In your browser it <strong class="result"></strong></p>
+			<a class="code">
+				<p class="how">How?</p>
+				<pre class="prettyprint lang-js"></pre>
+			</a>
+			<script type="text/test">var $test7 = $('test7'), handler;
+$test7.style[transition + 'Duration'] = '2000ms';
+$test7.style[transition + 'TimingFunction'] = 'linear';
+$test7.style[transition + 'Property'] = transformProp;
+$test7.addEventListener( transitionend, handler = function() {
+  $test7.removeEventListener( transitionend, handler, false );
+  // Restart the transition if it's paused
+  $test7.style[transform] = 'translateY(200px) rotate('+(6*Math.PI)+'rad)';
+}, false);
+$test7.style[transform] = 'translateY(200px) rotate('+(6*Math.PI)+'rad)';
+
+// Pause the transition after a 1s delay
+setTimeout(function() {
+  $test7.style[transform] = getComputedStyle($test7)[transform];
+
+  // Since the duration is 2s, the transition should be finished 2.2s later
+  test($test7, function() {
+    return / 200(px)?\)/.test(getComputedStyle($test7)[transform]);
+  // fail callback
+  }, false, function() {
+    $test7.style[transform] = getComputedStyle($test7)[transform];
+  }, 2200);
+}, 1000);</script>
+		</div>
+		
+		<div class="expect" id="_test8">
+			<h3 class="when" style="color:#004cbf">When...</h3>
+			<p class="action">...restarting a 2 seconds long transition stopped halfway through,</p>
+			<p>I expect the animation to last another 2 seconds (it should appear to slow down).</p>
+			<p>In your browser it <strong class="result"></strong></p>
+			<a class="code">
+				<p class="how">How?</p>
+				<pre class="prettyprint lang-js"></pre>
+			</a>
+			<script type="text/test">var $test8 = $('test8');
+$test8.style[transition + 'Duration'] = '2000ms';
+$test8.style[transition + 'TimingFunction'] = 'linear';
+$test8.style[transition + 'Property'] = transformProp;
+$test8.style[transform] = 'translateY(133px) rotate('+(4*Math.PI)+'rad)';
+
+// Pause the transition after a 800ms delay
+setTimeout(function() {
+  $test8.style[transform] = getComputedStyle($test8)[transform];
+  // Opera workaround
+  //$test8.style[transition + 'Duration'] = '2000ms';
+  // cross-browser workaround
+  //setTimeout(function() {
+    $test8.style[transform] = 'translateY(133px) rotate('+(4*Math.PI)+'rad)';
+  //});
+
+  // Make sure the transition hasn't finished 2.2s after it started
+  test($test8, function() {
+    return !/ 133(px)?\)/.test(getComputedStyle($test8)[transform]);
+  // success callback
+  }, function() {
+    $test8.style[transform] = 'translateY(200px) rotate('+(6*Math.PI)+'rad)';
+  }, 1400);
+}, 800);</script>
+		</div>
+		
+		<div class="expect" id="_test9">
+			<h3 class="when" style="color:#0900bf">When...</h3>
+			<p class="action">...setting the transition property list to <code>none</code> during a transition,</p>
+			<p>I expect the <code>transitionend</code> event to fire (immediatly).</p>
+			<p>In your browser it <strong class="result"></strong></p>
+			<a class="code">
+				<p class="how">How?</p>
+				<pre class="prettyprint lang-js"></pre>
+			</a>
+			<script type="text/test">var $test9 = $('test9');
+$test9.style[transition + 'Duration'] = '2000ms';
+$test9.style[transition + 'TimingFunction'] = 'linear';
+$test9.style[transition + 'Property'] = transformProp;
+$test9.addEventListener( transitionend, function() {
+  // change the transition duration to 1000s on transitionend
+  $test9.style[transition + 'Duration'] = '1000ms';
+  $test9.style[transition + 'Property'] = transformProp;
+  $test9.style[transform] = 'translateY(200px) rotate('+(6*Math.PI)+'rad)';
+}, false)
+$test9.style[transform] = 'translateY(150px) rotate('+(4.5*Math.PI)+'rad)';
+
+// Empty the transition-property list after a 800ms delay
+setTimeout(function() {
+  $test9.style[transition + 'Property'] = 'none';
+
+  // If the transitionend handler was triggered when emptying transition-property,
+  // the second transition should've complete in less than 1.2s
+  test($test9, function() {
+    return / 200(px)?\)/.test(getComputedStyle($test9)[transform]);
+  // fail callback
+  }, false, function() {
+    $test9.style[transform] = getComputedStyle($test9)[transform];
+  }, 1200);
+}, 800);</script>
+		</div>
+		
+		<div class="expect" id="_test10">
+			<h3 class="when" style="color:#5f00bf">When...</h3>
+			<p class="action">...changing the duration to <code>0</code> instead of <code>'0s'</code> (no transition running),</p>
+			<p>I expect the change to take effect.</p>
+			<p>In your browser it <strong class="result"></strong></p>
+			<a class="code">
+				<p class="how">How?</p>
+				<pre class="prettyprint lang-js"></pre>
+			</a>
+			<script type="text/test">var $test10 = $('test10');
+$test10.style[transition + 'Duration'] = '2000ms';
+$test10.style[transition + 'Duration'] = 0;
+$test10.style[transition + 'TimingFunction'] = 'linear';
+$test10.style[transition + 'Property'] = transformProp;
+$test10.style[transform] = 'translateY(50px) rotate('+(1.5*Math.PI)+'rad)';
+
+// Did the transition complete immediatly?
+test($test10, function() {
+  return / 50(px)?\)/.test(getComputedStyle($test10)[transform]);
+// success callback
+}, function() {
+  $test10.style[transition + 'Duration'] = '1500ms';
+  $test10.style[transform] = 'translateY(200px) rotate('+(6*Math.PI)+'rad)';
+// The delay is a workaround for an Opera bug pointed out in next test
+}, 100);</script>
+		</div>
+		
+		<div class="expect" id="_test11">
+			<h3 class="when" style="color:#b500bf">When...</h3>
+			<p class="action">...the transition duration of an element is set to <code>0</code> and the transition property list is empty,</p>
+			<p>I expect changes of style properties to take effect immediatly.</p>
+			<p>In your browser it <strong class="result"></strong></p>
+			<a class="code">
+				<p class="how">How?</p>
+				<pre class="prettyprint lang-js"></pre>
+			</a>
+			<script type="text/test">var $test11 = $('test11');
+// Opera workaround
+$test11.style[transition + 'Duration'] = 0;
+//$test11.style[transition + 'Property'] = 'none';
+$test11.style[transform] = 'translateY(50px) rotate('+(1.5*Math.PI)+'rad)';
+
+// The computed value should immediatly be what has just been set
+test($test11, function() {
+  return / 50(px)?\)/.test(getComputedStyle($test11)[transform]);
+// success callback
+}, function() {
+  $test11.style[transition + 'Duration'] = '1500ms';
+  $test11.style[transition + 'TimingFunction'] = 'linear';
+  $test11.style[transition + 'Property'] = transformProp;
+  $test11.style[transform] = 'translateY(200px) rotate('+(6*Math.PI)+'rad)';
+});</script>
+		</div>
+	</section>
+	<section id="disqus">
+		<h2 class="when">What do You Expect?</h2>
+		<div id="disqus_thread"></div>
+		<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+		<a href="http://disqus.com" class="dsq-brlink">blog comments powered by <span class="logo-disqus">Disqus</span></a>
+	</section>
+	
+	<p style="margin-top: 50px; font-size: 14px;">This page is brought to you by <a href="http://twitter.com/louis_remi">@louis_remi</a> and the code is available on <a href="https://github.com/lrbabe/jquery.transition.js/tree/gh-pages">github</a>.</p>
+	
+	<script type="text/javascript" src="prettify.js"></script>
+	<script type="text/javascript" src="script.js"></script>
+</body>
+</html>
