@@ -488,9 +488,10 @@ jQuery.extend( jQuery.fx.prototype, {
 		if ( transition[ prop ] ) {
 			timers.push(t);
 
-			// explicitely set the property to it's current computed value to workaround bugzil.la/571344
-			self.elem.style[ transition[prop].real ] = jQuery.css( self.elem, prop );
-			// Don't set the style immediatly, the transition property has not been filled yet
+			// explicitly set the property to it's current computed value to workaround bugzil.la/571344
+			// transform shouldn't cause any problem in this case, as it is covered by the spec.
+			prop != "transform" && ( self.elem.style[ transition[prop].real ] = jQuery.css( self.elem, prop ) );
+			// Don't set the style immediately, the transition property has not been filled yet
 			setTimeout(function() {
 				jQuery.style( self.elem, prop, to + self.unit );
 
