@@ -1,4 +1,6 @@
-/* Cases where transition is disabled:
+/* Codebase: jQuery 1.7.1
+ * 
+ * Cases where transition is disabled:
  * - in incompatible browsers (Opera 11 included)
  * - when the animated object is not an element
  * - when there is a special easing
@@ -40,16 +42,21 @@ jQuery.support.transition =
 	'Webkit'+trans in divStyle ? 'Webkit'+trans:
 	false;
 
+var jQA = jQuery.extend(true, {}, jQuery.fn.animate);
+jQuery.fn.extend({ basicAnimate: jQA });
+    
+
+
 jQuery.fn.extend({/*
 	show: function( speed, easing, callback ) {
 		var elem, display;
 
 		if ( speed || speed === 0 ) {
-			return this.animate( genFx("show", 3), speed, easing, callback);
+			return this.animate( genFx("show", 3), speed, easing, callback );
 
 		} else {
 			for ( var i = 0, j = this.length; i < j; i++ ) {
-				elem = this[i];
+				elem = this[ i ];
 
 				if ( elem.style ) {
 					display = elem.style.display;
@@ -63,8 +70,8 @@ jQuery.fn.extend({/*
 					// Set elements which have been overridden with display: none
 					// in a stylesheet to whatever the default browser style is
 					// for such an element
-					if ( display === "" && jQuery.css( elem, "display" ) === "none" ) {
-						jQuery._data(elem, "olddisplay", defaultDisplay(elem.nodeName));
+					if ( display === "" && jQuery.css(elem, "display") === "none" ) {
+						jQuery._data( elem, "olddisplay", defaultDisplay(elem.nodeName) );
 					}
 				}
 			}
@@ -72,13 +79,13 @@ jQuery.fn.extend({/*
 			// Set the display of most of the elements in a second loop
 			// to avoid the constant reflow
 			for ( i = 0; i < j; i++ ) {
-				elem = this[i];
+				elem = this[ i ];
 
 				if ( elem.style ) {
 					display = elem.style.display;
 
 					if ( display === "" || display === "none" ) {
-						elem.style.display = jQuery._data(elem, "olddisplay") || "";
+						elem.style.display = jQuery._data( elem, "olddisplay" ) || "";
 					}
 				}
 			}
@@ -92,12 +99,17 @@ jQuery.fn.extend({/*
 			return this.animate( genFx("hide", 3), speed, easing, callback);
 
 		} else {
-			for ( var i = 0, j = this.length; i < j; i++ ) {
-				if ( this[i].style ) {
-					var display = jQuery.css( this[i], "display" );
+			var elem, display,
+				i = 0,
+				j = this.length;
 
-					if ( display !== "none" && !jQuery._data( this[i], "olddisplay" ) ) {
-						jQuery._data( this[i], "olddisplay", display );
+			for ( ; i < j; i++ ) {
+				elem = this[i];
+				if ( elem.style ) {
+					display = jQuery.css( elem, "display" );
+
+					if ( display !== "none" && !jQuery._data( elem, "olddisplay" ) ) {
+						jQuery._data( elem, "olddisplay", display );
 					}
 				}
 			}
@@ -142,7 +154,7 @@ jQuery.fn.extend({/*
 	},*/
 
 	animate: function( prop, speed, easing, callback ) {
-		var optall = jQuery.speed(speed, easing, callback);
+		var optall = jQuery.speed( speed, easing, callback );
 
 		if ( jQuery.isEmptyObject( prop ) ) {
 			return this.each( optall.complete, [ false ] );
@@ -151,7 +163,7 @@ jQuery.fn.extend({/*
 		// Do not change referenced properties as per-property easing will be lost
 		prop = jQuery.extend( {}, prop );
 
-		return this[ optall.queue === false ? "each" : "queue" ](function() {
+		function doAnimation() {
 			// XXX 'this' does not always have a nodeName when running the
 			// test suite
 
@@ -162,10 +174,10 @@ jQuery.fn.extend({/*
 			var opt = jQuery.extend( {}, optall ),
 				isElement = this.nodeType === 1,
 				hidden = isElement && jQuery(this).is(":hidden"),
-				name, val, p,
-				display, e,
+				name, val, p, e,
 				parts, start, end, unit,
-				// TRANSITION++
+				method,
+				// ++TRANSITION
 				cssProps = jQuery.cssProps,
 				// disable transition if a step option is supplied
 				supportTransition = !opt.step && jQuery.support.transition,
@@ -175,7 +187,7 @@ jQuery.fn.extend({/*
 
 			// will store per property easing and be used to determine when an animation is complete
 			opt.animatedProperties = {};
-			// TRANSITION++
+			// ++TRANSITION
 			// transition is enabled per property, when:
 			// - there is no step function for the animation
 			// - there is no special easing for the property
@@ -194,10 +206,10 @@ jQuery.fn.extend({/*
 
 				// easing resolution: per property > opt.specialEasing > opt.easing > 'swing' (default)
 				if ( jQuery.isArray( val ) ) {
-					easing = opt.animatedProperties[ name ] = val[ 1 ];
+					opt.animatedProperties[ name ] = val[ 1 ];
 					val = prop[ name ] = val[ 0 ];
 				} else {
-					easing = opt.animatedProperties[ name ] = opt.specialEasing && opt.specialEasing[ name ] || opt.easing || 'swing';
+					opt.animatedProperties[ name ] = opt.specialEasing && opt.specialEasing[ name ] || opt.easing || 'swing';
 				}
 
 				// TRANSITION++
@@ -240,25 +252,17 @@ jQuery.fn.extend({/*
 					opt.overflow = [ this.style.overflow, this.style.overflowX, this.style.overflowY ];
 
 					// Set display property to inline-block for height/width
-					// animations on inline elements that are having width/height
-					// animated
+					// animations on inline elements that are having width/height animated
 					if ( jQuery.css( this, "display" ) === "inline" &&
 							jQuery.css( this, "float" ) === "none" ) {
-						if ( !jQuery.support.inlineBlockNeedsLayout ) {
+
+						// inline-level elements accept inline-block;
+						// block-level elements need to be inline with layout
+						if ( !jQuery.support.inlineBlockNeedsLayout || defaultDisplay( this.nodeName ) === "inline" ) {
 							this.style.display = "inline-block";
 
 						} else {
-							display = defaultDisplay( this.nodeName );
-
-							// inline-level elements accept inline-block;
-							// block-level elements need to be inline with layout
-							if ( display === "inline" ) {
-								this.style.display = "inline-block";
-
-							} else {
-								this.style.display = "inline";
-								this.style.zoom = 1;
-							}
+							this.style.zoom = 1;
 						}
 					}
 				}
@@ -272,8 +276,17 @@ jQuery.fn.extend({/*
 				e = new jQuery.fx( this, opt, p );
 				val = prop[ p ];
 
-				if ( rfxtypes.test(val) ) {
-					e[ val === "toggle" ? hidden ? "show" : "hide" : val ]();
+				if ( rfxtypes.test( val ) ) {
+
+					// Tracks whether to show or hide based on private
+					// data attached to the element
+					method = jQuery._data( this, "toggle" + p ) || ( val === "toggle" ? hidden ? "show" : "hide" : 0 );
+					if ( method ) {
+						jQuery._data( this, "toggle" + p, method === "show" ? "hide" : "show" );
+						e[ method ]();
+					} else {
+						e[ val ]();
+					}
 
 				} else {
 					parts = rfxnum.exec( val );
@@ -286,7 +299,7 @@ jQuery.fn.extend({/*
 						// We need to compute starting value
 						if ( unit !== "px" ) {
 							jQuery.style( this, p, (end || 1) + unit);
-							start = ((end || 1) / e.cur()) * start;
+							start = ( (end || 1) / e.cur() ) * start;
 							jQuery.style( this, p, start + unit);
 						}
 
@@ -302,7 +315,7 @@ jQuery.fn.extend({/*
 					}
 				}
 			}
-
+			
 			// TRANSITION++
 			if ( supportTransition && transitions.length ) {
 				transition = this.style[supportTransition];
@@ -311,42 +324,77 @@ jQuery.fn.extend({/*
 
 			// For JS strict compliance
 			return true;
-		});
-	},
-
-	stop: function( clearQueue, gotoEnd ) {
-		if ( clearQueue ) {
-			this.queue([]);
 		}
 
-		this.each(function() {
-			var timers = jQuery.timers,
-				i = timers.length,
-				// TRANSITION++
+		return optall.queue === false ?
+			this.each( doAnimation ) :
+			this.queue( optall.queue, doAnimation );
+	},
+
+	stop: function( type, clearQueue, gotoEnd ) {
+		if ( typeof type !== "string" ) {
+			gotoEnd = clearQueue;
+			clearQueue = type;
+			type = undefined;
+		}
+		if ( clearQueue && type !== false ) {
+			this.queue( type || "fx", [] );
+		}
+
+		return this.each(function() {
+			var index,
+				hadTimers = false,
+				timers = jQuery.timers,
+				data = jQuery._data( this ),
+				// ++TRANSITION
 				supportTransition = jQuery.support.transition;
+				
+                
 			// clear marker counters if we know they won't be
 			if ( !gotoEnd ) {
 				jQuery._unmark( true, this );
 			}
-			while ( i-- ) {
-				if ( timers[i].elem === this ) {
-					// TRANSITION++
-					if ( gotoEnd || supportTransition ) {
-						// force the next step to be the last
-						timers[i]( gotoEnd );
-					}
 
-					timers.splice(i, 1);
+			function stopQueue( elem, data, index ) {
+				var hooks = data[ index ];
+				jQuery.removeData( elem, index, true );
+				hooks.stop( gotoEnd );
+			}
+
+			if ( type == null ) {
+				for ( index in data ) {
+					if ( data[ index ] && data[ index ].stop && index.indexOf(".run") === index.length - 4 ) {
+						stopQueue( this, data, index );
+					}
+				}
+			} else if ( data[ index = type + ".run" ] && data[ index ].stop ){
+				stopQueue( this, data, index );
+			}
+
+			for ( index = timers.length; index--; ) {
+				if ( timers[ index ].elem === this && (type == null || timers[ index ].queue === type) ) {
+					
+					
+					
+					if ( gotoEnd || supportTransition ) {
+
+						// force the next step to be the last
+						timers[ index ]( true );
+					} else {
+						timers[ index ].saveState();
+					}
+					hadTimers = true;
+					timers.splice( index, 1 );
 				}
 			}
+
+			// start the next in the queue if the last step wasn't forced
+			// timers currently will call their complete callbacks, which will dequeue
+			// but only if they were gotoEnd
+			if ( !( gotoEnd && hadTimers ) ) {
+				jQuery.dequeue( this, type );
+			}
 		});
-
-		// start the next in the queue if the last step wasn't forced
-		if ( !gotoEnd ) {
-			this.dequeue();
-		}
-
-		return this;
 	}
 
 });
@@ -365,7 +413,7 @@ function clearFxNow() {
 function genFx( type, num ) {
 	var obj = {};
 
-	jQuery.each( fxAttrs.concat.apply([], fxAttrs.slice(0,num)), function() {
+	jQuery.each( fxAttrs.concat.apply([], fxAttrs.slice( 0, num )), function() {
 		obj[ this ] = type;
 	});
 
@@ -374,9 +422,9 @@ function genFx( type, num ) {
 
 // Generate shortcuts for custom animations
 jQuery.each({
-	slideDown: genFx("show", 1),
-	slideUp: genFx("hide", 1),
-	slideToggle: genFx("toggle", 1),
+	slideDown: genFx( "show", 1 ),
+	slideUp: genFx( "hide", 1 ),
+	slideToggle: genFx( "toggle", 1 ),
 	fadeIn: { opacity: "show" },
 	fadeOut: { opacity: "hide" },
 	fadeToggle: { opacity: "toggle" }
@@ -388,25 +436,31 @@ jQuery.each({
 
 jQuery.extend({
 	speed: function( speed, easing, fn ) {
-		var opt = speed && typeof speed === "object" ? jQuery.extend({}, speed) : {
+		var opt = speed && typeof speed === "object" ? jQuery.extend( {}, speed ) : {
 			complete: fn || !fn && easing ||
 				jQuery.isFunction( speed ) && speed,
 			duration: speed,
-			easing: fn && easing || easing && !jQuery.isFunction(easing) && easing
+			easing: fn && easing || easing && !jQuery.isFunction( easing ) && easing
 		};
 
 		opt.duration = jQuery.fx.off ? 0 : typeof opt.duration === "number" ? opt.duration :
-			opt.duration in jQuery.fx.speeds ? jQuery.fx.speeds[opt.duration] : jQuery.fx.speeds._default;
+			opt.duration in jQuery.fx.speeds ? jQuery.fx.speeds[ opt.duration ] : jQuery.fx.speeds._default;
+
+		// normalize opt.queue - true/undefined/null -> "fx"
+		if ( opt.queue == null || opt.queue === true ) {
+			opt.queue = "fx";
+		}
 
 		// Queueing
 		opt.old = opt.complete;
+
 		opt.complete = function( noUnmark ) {
 			if ( jQuery.isFunction( opt.old ) ) {
 				opt.old.call( this );
 			}
 
-			if ( opt.queue !== false ) {
-				jQuery.dequeue( this );
+			if ( opt.queue ) {
+				jQuery.dequeue( this, opt.queue );
 			} else if ( noUnmark !== false ) {
 				jQuery._unmark( this );
 			}
@@ -420,7 +474,7 @@ jQuery.extend({
 			return firstNum + diff * p;
 		},
 		swing: function( p, n, firstNum, diff ) {
-			return ((-Math.cos(p*Math.PI)/2) + 0.5) * diff + firstNum;
+			return ( ( -Math.cos( p*Math.PI ) / 2 ) + 0.5 ) * diff + firstNum;
 		}
 	},
 
@@ -465,26 +519,29 @@ jQuery.extend( jQuery.fx.prototype, {
 	custom: function( from, to, unit ) {
 		var self = this,
 			fx = jQuery.fx,
-			raf,
 			// TRANSITION++
 			transition = self.options.transition,
 			timers = jQuery.timers,
 			prop = this.prop;
 
 		this.startTime = fxNow || createFxNow();
-		this.start = from;
 		this.end = to;
-		this.unit = unit || this.unit || ( jQuery.cssNumber[ prop ] ? "" : "px" );
-		this.now = this.start;
+		this.now = this.start = from;
 		this.pos = this.state = 0;
+		this.unit = unit || this.unit || ( jQuery.cssNumber[ this.prop ] ? "" : "px" );
 
 		function t( gotoEnd ) {
 			return self.step( gotoEnd );
 		}
 
+		t.queue = this.options.queue;
 		t.elem = this.elem;
-		t.transition = transition[prop];
-
+		t.saveState = function() {
+			if ( self.options.hide && jQuery._data( self.elem, "fxshow" + self.prop ) === undefined ) {
+				jQuery._data( self.elem, "fxshow" + self.prop, self.start );
+			}
+		};
+		
 		if ( transition[ prop ] ) {
 			timers.push(t);
 
@@ -505,33 +562,26 @@ jQuery.extend( jQuery.fx.prototype, {
 			}, 0);
 
 		} else if ( t() && jQuery.timers.push(t) && !timerId ) {
-			// Use requestAnimationFrame instead of setInterval if available
-			if ( requestAnimationFrame ) {
-				timerId = 1;
-				raf = function() {
-					// When timerId gets set to null at any point, this stops
-					if ( timerId ) {
-						requestAnimationFrame( raf );
-						fx.tick();
-					}
-				};
-				requestAnimationFrame( raf );
-			} else {
-				timerId = setInterval( fx.tick, fx.interval );
-			}
+			timerId = setInterval( fx.tick, fx.interval );
 		}
 	},
 
 	/*// Simple 'show' function
 	show: function() {
+		var dataShow = jQuery._data( this.elem, "fxshow" + this.prop );
+
 		// Remember where we started, so that we can go back to it later
-		this.options.orig[this.prop] = jQuery.style( this.elem, this.prop );
+		this.options.orig[ this.prop ] = dataShow || jQuery.style( this.elem, this.prop );
 		this.options.show = true;
 
 		// Begin the animation
-		// Make sure that we start at a small width/height to avoid any
-		// flash of content
-		this.custom(this.prop === "width" || this.prop === "height" ? 1 : 0, this.cur());
+		// Make sure that we start at a small width/height to avoid any flash of content
+		if ( dataShow !== undefined ) {
+			// This show is picking up where a previous hide or show left off
+			this.custom( this.cur(), dataShow );
+		} else {
+			this.custom( this.prop === "width" || this.prop === "height" ? 1 : 0, this.cur() );
+		}
 
 		// Start by showing the element
 		jQuery( this.elem ).show();
@@ -540,20 +590,20 @@ jQuery.extend( jQuery.fx.prototype, {
 	// Simple 'hide' function
 	hide: function() {
 		// Remember where we started, so that we can go back to it later
-		this.options.orig[this.prop] = jQuery.style( this.elem, this.prop );
+		this.options.orig[ this.prop ] = jQuery._data( this.elem, "fxshow" + this.prop ) || jQuery.style( this.elem, this.prop );
 		this.options.hide = true;
 
 		// Begin the animation
-		this.custom(this.cur(), 0);
+		this.custom( this.cur(), 0 );
 	},*/
 
 	// Each step of an animation
 	step: function( gotoEnd ) {
-		var t = fxNow || createFxNow(),
+		var p, n, complete,
+			t = fxNow || createFxNow(),
 			done = true,
 			elem = this.elem,
 			options = this.options,
-			i, n, p,
 			// TRANSITION++
 			transition = options.transition[ this.prop ],
 			supportTransition;
@@ -599,7 +649,10 @@ jQuery.extend( jQuery.fx.prototype, {
 				// Reset the properties, if the item has been hidden or shown
 				if ( options.hide || options.show ) {
 					for ( p in options.animatedProperties ) {
-						jQuery.style( elem, p, options.orig[p] );
+						jQuery.style( elem, p, options.orig[ p ] );
+						jQuery.removeData( elem, "fxshow" + p, true );
+						// Toggle data is no longer needed
+						jQuery.removeData( elem, "toggle" + p, true );
 					}
 				}
 
@@ -614,7 +667,15 @@ jQuery.extend( jQuery.fx.prototype, {
 				}
 
 				// Execute the complete function
-				options.complete.call( elem );
+				// in the event that the complete function throws an exception
+				// we must ensure it won't be called twice. #5684
+
+				complete = options.complete;
+				if ( complete ) {
+
+					options.complete = false;
+					complete.call( elem );
+				}
 			}
 
 			return false;
@@ -641,9 +702,15 @@ jQuery.extend( jQuery.fx.prototype, {
 
 jQuery.extend( jQuery.fx, {
 	tick: function() {
-		for ( var timers = jQuery.timers, i = 0 ; i < timers.length ; ++i ) {
+		var timer,
+			timers = jQuery.timers,
+			i = 0;
+
+		for ( ; i < timers.length; i++ ) {
+			timer = timers[ i ];
+			// Checks the timer has not already been removed
 			// TRANSITION++
-			if ( !timers[i].transition && !timers[i]() ) {
+			if ( !timers[i].transition && !timer() && timers[ i ] === timer ) {
 				timers.splice( i--, 1 );
 			}
 		}
@@ -674,7 +741,7 @@ jQuery.extend( jQuery.fx, {
 
 		_default: function( fx ) {
 			if ( fx.elem.style && fx.elem.style[ fx.prop ] != null ) {
-				fx.elem.style[ fx.prop ] = (fx.prop === "width" || fx.prop === "height" ? Math.max(0, fx.now) : fx.now) + fx.unit;
+				fx.elem.style[ fx.prop ] = fx.now + fx.unit;
 			} else {
 				fx.elem[ fx.prop ] = fx.now;
 			}
@@ -682,7 +749,15 @@ jQuery.extend( jQuery.fx, {
 	}*/
 });
 
-/*if ( jQuery.expr && jQuery.expr.filters ) {
+/*// Adds width/height step functions
+// Do not set anything below 0
+jQuery.each([ "width", "height" ], function( i, prop ) {
+	jQuery.fx.step[ prop ] = function( fx ) {
+		jQuery.style( fx.elem, prop, Math.max(0, fx.now) + fx.unit );
+	};
+});
+
+if ( jQuery.expr && jQuery.expr.filters ) {
 	jQuery.expr.filters.animated = function( elem ) {
 		return jQuery.grep(jQuery.timers, function( fn ) {
 			return elem === fn.elem;
@@ -698,7 +773,6 @@ function defaultDisplay( nodeName ) {
 		var body = document.body,
 			elem = jQuery( "<" + nodeName + ">" ).appendTo( body ),
 			display = elem.css( "display" );
-
 		elem.remove();
 
 		// If the simple way fails,
@@ -726,7 +800,6 @@ function defaultDisplay( nodeName ) {
 			iframeDoc.body.appendChild( elem );
 
 			display = jQuery.css( elem, "display" );
-
 			body.removeChild( iframe );
 		}
 
