@@ -218,7 +218,7 @@ jQuery.fn.extend({
 
 				// ++TRANSITION++
 				// check that CSS Transitions can be used
-				transition = supportTransition && isElement && opt.duration > 0 && name !== "scrollTop" && (
+				transition = supportTransition && isElement && opt.duration > 0 && name.indexOf("scroll") && (
 					// we could use a hash to convert the names
 					easing == 'swing' ? 'ease':
 					easing == 'linear' ? easing:
