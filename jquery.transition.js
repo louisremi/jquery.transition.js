@@ -217,8 +217,8 @@ jQuery.fn.extend({
 				}
 
 				// ++TRANSITION++
-				// prevent transition when a special easing is supplied
-				transition = supportTransition && isElement && opt.duration > 0 && (
+				// check that CSS Transitions can be used
+				transition = supportTransition && isElement && opt.duration > 0 && name !== "scrollTop" && (
 					// we could use a hash to convert the names
 					easing == 'swing' ? 'ease':
 					easing == 'linear' ? easing:
