@@ -1,10 +1,7 @@
 jquery.transition.js
-=============================
+====================
 
 Upgrade jQuery's `.animate()` method to use CSS3 Transitions in modern browsers.
-
-jquery.transition.js
-====================
 
 How to use it?
 --------------
