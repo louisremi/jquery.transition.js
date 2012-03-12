@@ -676,7 +676,7 @@ jQuery.extend( jQuery.fx.prototype, {
 				// we must ensure it won't be called twice. #5684
 
 				complete = options.complete;
-				if ( complete ) {
+				if ( complete && gotoEnd ) {
 
 					options.complete = false;
 					complete.call( elem );
