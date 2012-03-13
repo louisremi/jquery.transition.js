@@ -611,9 +611,10 @@ jQuery.extend( jQuery.fx.prototype, {
 			options = this.options,
 			// ++TRANSITION++
 			transition = options.transition[ this.prop ],
-			supportTransition;
+			supportTransition,
+			durationReached = t >= options.duration + this.startTime;
 
-		if ( transition || gotoEnd || t >= options.duration + this.startTime ) {
+		if ( transition || gotoEnd ||  durationReached) {
 			if ( !transition ) {
 				this.now = this.end;
 				this.pos = this.state = 1;
@@ -676,7 +677,7 @@ jQuery.extend( jQuery.fx.prototype, {
 				// we must ensure it won't be called twice. #5684
 
 				complete = options.complete;
-				if ( complete ) {
+				if ( complete && (gotoEnd || durationReached) ) {
 
 					options.complete = false;
 					complete.call( elem );
