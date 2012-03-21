@@ -52,14 +52,14 @@ var
 			transition:
 			  divStyle.MozTransition === ''? {name: 'MozTransition', end: 'transitionend'} :
 			  // Will ms add a prefix to the transitionend event?
-			  (divStyle.MsTransition === ''? {name: 'MsTransition', end: 'msTransitionend'} :
+			  (divStyle.msTransition === ''? {name: 'msTransition', end: 'msTransitionend'} :
 			  (divStyle.WebkitTransition === ''? {name: 'WebkitTransition', end: 'webkitTransitionEnd'} :
 			  (divStyle.OTransition === ''? {name: 'OTransition', end: 'oTransitionEnd'} :
 			  (divStyle.transition === ''? {name: 'transition', end: 'transitionend'} :
 			  false))))
 		, transform:
 			  divStyle.MozTransform === ''? 'MozTransform' :
-			  (divStyle.MsTransform === ''? 'MsTransform' :
+			  (divStyle.msTransform === ''? 'msTransform' :
 			  (divStyle.WebkitTransform === ''? 'WebkitTransform' : 
 			  (divStyle.OTransform === ''? 'OTransform' :
 			  (divStyle.transform === ''? 'transform' :
