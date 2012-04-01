@@ -25,7 +25,6 @@ Although CSS3 transitions are implemented in Opera, the implementation has too m
 Note that transitions are turned OFF under certain circumstencies:
 
 - when the animated object is not an element
-- when a special easing is used
 - when a step function is used
 
 How different is it?
@@ -39,7 +38,7 @@ Even better, it has been designed to be compatible with cssHooks.
 The first compatible one is [jquery.transform.js](http://github.com/louisremi/jquery.transform.js).
 Others will follow.
 
-jquery.transition.js has been tested against jQuery unit-tests, and only 8 of them fail, mostly for timing issues.
+jquery.transition.js has been tested against jQuery unit-tests, and only 5 of them fail (under investigations).
 It benefits from the experience of writing [csstransition.net](http://www.csstransition.net/) to workaround implementation quirks.
 
 When should I use it?
