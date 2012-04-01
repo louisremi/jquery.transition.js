@@ -13,6 +13,7 @@ var elemdisplay = {},
 	iframe, iframeDoc,
 	rfxtypes = /^(?:toggle|show|hide)$/,
 	rfxnum = /^([+\-]=)?([\d+.\-]+)([a-z%]*)$/i,
+	//rMarginProp = /^margin/,
 	timerId,
 	/*fxAttrs = [
 		// height animations
@@ -28,14 +29,46 @@ var elemdisplay = {},
 // Following feature test code should be moved to support.js
 var div = document.createElement( "div" ),
 	divStyle = div.style,
-	trans = "Transition";
+	trans = "Transition",
+	_cubicBezier = "cubic-bezier(",
+	easingTable;
 // Only test for transition support in Firefox and Webkit
 // as we know for sure that Opera has too much bugs (see http://csstransition.net)
 // and there's no guarantee that first IE implementation will be bug-free
 jQuery.support.transition =
-	"Moz"+trans in divStyle ? "Moz"+trans:
-	"Webkit"+trans in divStyle ? "Webkit"+trans:
+	"Moz" + trans in divStyle ? "Moz" + trans :
+	"Webkit" + trans in divStyle ? "Webkit" + trans :
 	false;
+// Following declarations should be moved to css.js
+jQuery.cssNumber.color = jQuery.cssNumber.backgroundColor = true;
+// Translation table from "jQuery easings" to "transition timing functions"
+easingTable = {
+	linear:         "linear",
+	swing:          "ease-out",
+	bounce:         _cubicBezier + "0,.35,.5,1.3)",
+	// Penner equation approximations from Matthew Lein's Ceaser: http://matthewlein.com/ceaser/
+	easeInQuad:     _cubicBezier + ".55,.085,.68,.53)",
+	easeInCubic:    _cubicBezier + ".55,.055,.675,.19)",
+	easeInQuart:    _cubicBezier + ".895,.03,.685,.22)",
+	easeInQuint:    _cubicBezier + ".755,.05,.855,.06)",
+	easeInSine:     _cubicBezier + ".47,0,.745,.715)",
+	easeInExpo:     _cubicBezier + ".95,.05,.795,.035)",
+	easeInCirc:     _cubicBezier + ".6,.04,.98,.335)",
+	easeOutQuad:    _cubicBezier + ".25,.46,.45,.94)",
+	easeOutCubic:   _cubicBezier + ".215,.61,.355,1)",
+	easeOutQuart:   _cubicBezier + ".165,.84,.44,1)",
+	easeOutQuint:   _cubicBezier + ".23,1,.32,1)",
+	easeOutSine:    _cubicBezier + ".39,.575,.565,1)",
+	easeOutExpo:    _cubicBezier + ".19,1,.22,1)",
+	easeOutCirc:    _cubicBezier + ".075,.82,.165,1)",
+	easeInOutQuad:  _cubicBezier + ".455,.03,.515,.955)",
+	easeInOutCubic: _cubicBezier + ".645,.045,.355,1)",
+	easeInOutQuart: _cubicBezier + ".77,0,.175,1)",
+	easeInOutQuint: _cubicBezier + ".86,0,.07,1)",
+	easeInOutSine:  _cubicBezier + ".445,.05,.55,.95)",
+	easeInOutExpo:  _cubicBezier + "1,0,0,1)",
+	easeInOutCirc:  _cubicBezier + ".785,.135,.15,.86)"
+};
 
 jQuery.fn.extend({
 	/*show: function( speed, easing, callback ) {
@@ -174,7 +207,8 @@ jQuery.fn.extend({
 				supportTransition = !opt.step && jQuery.support.transition,
 				transition,
 				transitions = [],
-				easing, real, lower;
+				easing, real, lower,
+				computedStyle;
 
 			// will store per property easing and be used to determine when an animation is complete
 			opt.animatedProperties = {};
@@ -213,17 +247,12 @@ jQuery.fn.extend({
 					/* ++TRANSITION++ */ easing = opt.animatedProperties[ name ] = val[ 1 ];
 					val = prop[ name ] = val[ 0 ];
 				} else {
-					/* ++TRANSITION++ */ easing = opt.animatedProperties[ name ] = opt.specialEasing && opt.specialEasing[ name ] || opt.easing || 'swing';
+					/* ++TRANSITION++ */ easing = opt.animatedProperties[ name ] = opt.specialEasing && opt.specialEasing[ name ] || opt.easing || "swing";
 				}
 
 				// ++TRANSITION++
 				// check that CSS Transitions can be used
-				transition = supportTransition && isElement && opt.duration > 0 && name.indexOf("scroll") && (
-					// we could use a hash to convert the names
-					easing == 'swing' ? 'ease':
-					easing == 'linear' ? easing:
-					false
-				);
+				transition = supportTransition && isElement && opt.duration > 0 && name.indexOf( "scroll" ) && easingTable[ easing ];
 
 				// collect the properties to be added to elem.style.transition...
 				if ( transition ) {
@@ -323,9 +352,15 @@ jQuery.fn.extend({
 			// ++TRANSITION++
 			if ( supportTransition && transitions.length ) {
 				transition = this.style[supportTransition];
-				this.style[supportTransition] = transitions.join() + (transition ? ',' + transition : '');
+				computedStyle = window.getComputedStyle( this );
+
+				this.style[ supportTransition ] =
+					transitions.join() + ( transition && transition.indexOf( "none" ) ? "," + transition : "" );
 				// Once the transition property has been set, it's time to set all animated style properties
 				for ( p in opt.transition ) {
+					// access the computed style to make sure it has been taken into account by the browser
+					computedStyle[ p ];
+					// ...before setting the target style
 					jQuery.style.apply( null, opt.transition[ p ].styleToSet );
 				}
 			}
@@ -476,11 +511,11 @@ jQuery.extend({
 	},
 
 	easing: {
-		linear: function( p, n, firstNum, diff ) {
-			return firstNum + diff * p;
+		linear: function( p ) {
+			return p;
 		},
-		swing: function( p, n, firstNum, diff ) {
-			return ( ( -Math.cos( p*Math.PI ) / 2 ) + 0.5 ) * diff + firstNum;
+		swing: function( p ) {
+			return ( -Math.cos( p*Math.PI ) / 2 ) + 0.5;
 		}
 	},
 
@@ -543,8 +578,12 @@ jQuery.extend( jQuery.fx.prototype, {
 		t.queue = this.options.queue;
 		t.elem = this.elem;
 		t.saveState = function() {
-			if ( self.options.hide && jQuery._data( self.elem, "fxshow" + self.prop ) === undefined ) {
-				jQuery._data( self.elem, "fxshow" + self.prop, self.start );
+			if ( jQuery._data( self.elem, "fxshow" + self.prop ) === undefined ) {
+				if ( self.options.hide ) {
+					jQuery._data( self.elem, "fxshow" + self.prop, self.start );
+				} else if ( self.options.show ) {
+					jQuery._data( self.elem, "fxshow" + self.prop, self.end );
+				}
 			}
 		};
 
@@ -552,19 +591,24 @@ jQuery.extend( jQuery.fx.prototype, {
 		if ( ( t.transition = transition[ prop ] ) ) {
 			jQuery.timers.push( t );
 
-			// explicitly set the property to it's current computed value to workaround bugzil.la/571344
+			// explicitly set the property to it's initial value to workaround bugzil.la/571344
 			// transform shouldn't cause any problem in this case, as it is covered by the spec.
-			prop != "transform" && ( self.elem.style[ transition[ prop ].real ] = jQuery.css( self.elem, prop ) );
+			if ( prop != "transform" ) {
+				self.elem.style[ transition[ prop ].real ] = from + self.unit;
+			}
+
+			// prevent negative values on certain properties
+			jQuery.fx.step[ prop ] && ( to = Math.max(0, to) );
 
 			transition[ prop ].styleToSet = [ self.elem, prop, to + self.unit ];
 
-				// use a setTimeout to detect the end of a transition
-				// the transitionend event is unreliable
-				transition[ prop ].timeout = setTimeout(function() {
-					jQuery.timers.splice( jQuery.timers.indexOf( t ), 1 );
-					self.step( true );
-				// add an unperceptible delay to help some tests pass in Firefox
-				}, self.options.duration + 15);
+			// use a setTimeout to detect the end of a transition
+			// the transitionend event is unreliable
+			transition[ prop ].timeout = setTimeout(function() {
+				jQuery.timers.splice( jQuery.timers.indexOf( t ), 1 );
+				self.step( true );
+			// add an unperceptible delay to help some tests pass in Firefox
+			}, self.options.duration + 30);
 
 		} else if ( t() && jQuery.timers.push(t) && !timerId ) {
 			timerId = setInterval( fx.tick, fx.interval );
@@ -611,21 +655,22 @@ jQuery.extend( jQuery.fx.prototype, {
 			options = this.options,
 			// ++TRANSITION++
 			transition = options.transition[ this.prop ],
-			supportTransition;
+			naturalEnd = t >= options.duration + this.startTime,
+			supportTransition = jQuery.support.transition;
 
-		if ( transition || gotoEnd || t >= options.duration + this.startTime ) {
+		if ( transition || gotoEnd || naturalEnd ) {
 			if ( !transition ) {
 				this.now = this.end;
 				this.pos = this.state = 1;
 				this.update();
 			// ++TRANSITION++
 			} else {
-				clearTimeout(transition.timeout);
+				clearTimeout( transition.timeout );
 				// Stop a transition halfway through
-				if ( !gotoEnd ) {
-					// yes, stoping a transition halfway through should be as simple as setting a property to its current value.
+				if ( !gotoEnd && !naturalEnd ) {
+					// yes, stopping a transition halfway through should be as simple as setting a property to its current value.
 					// Try to call window.getComputedStyle() only once per element (in tick()?)
-					this.elem.style[transition.real] = jQuery.css( this.elem, transition.real );
+					this.elem.style[ transition.real ] = jQuery.css( this.elem, transition.real );
 				}
 			}
 
@@ -651,24 +696,29 @@ jQuery.extend( jQuery.fx.prototype, {
 					jQuery( elem ).hide();
 				}
 
+				// ++TRANSITION++
+				// cleanup the transition property
+				if ( transition ) {
+					transition = "," + elem.style[ supportTransition ];
+					for ( p in options.transition ) {
+						transition = transition.split( options.transition[ p ].lower ).join("_");
+					}
+					transition = transition.replace( /, ?_[^,]*/g, "" ).substr(1);
+					// if the resulting string is empty, replace it with "none" to achieve gotoEnd
+					elem.style[ supportTransition ] = transition || "none";
+					// finish on an empty string if "none" has been used
+					// this way transitions set with CSS aren't overridden.
+					!transition && ( elem.style[ supportTransition ] = transition );
+				}
+
 				// Reset the properties, if the item has been hidden or shown
 				if ( options.hide || options.show ) {
 					for ( p in options.animatedProperties ) {
-						jQuery.style( elem, p, options.orig[ p ] );
+						( gotoEnd || naturalEnd ) && jQuery.style( elem, p, options.orig[ p ] );
 						jQuery.removeData( elem, "fxshow" + p, true );
 						// Toggle data is no longer needed
 						jQuery.removeData( elem, "toggle" + p, true );
 					}
-				}
-
-				// ++TRANSITION++
-				// cleanup the transition property
-				if ( (supportTransition = elem.nodeType === 1 && jQuery.support.transition) ) {
-					transition = ',' + elem.style[supportTransition];
-					for ( p in options.transition ) {
-						transition = transition.split( options.transition[p].lower ).join('_');
-					}
-					elem.style[supportTransition] = transition.replace(/, ?_[^,]*/g, '').substr(1);
 				}
 
 				// Execute the complete function
@@ -676,7 +726,7 @@ jQuery.extend( jQuery.fx.prototype, {
 				// we must ensure it won't be called twice. #5684
 
 				complete = options.complete;
-				if ( complete ) {
+				if ( complete && ( gotoEnd || naturalEnd ) ) {
 
 					options.complete = false;
 					complete.call( elem );
@@ -754,12 +804,14 @@ jQuery.extend( jQuery.fx, {
 	}*/
 });
 
-/*// Adds width/height step functions
-// Do not set anything below 0
-jQuery.each([ "width", "height" ], function( i, prop ) {
-	jQuery.fx.step[ prop ] = function( fx ) {
-		jQuery.style( fx.elem, prop, Math.max(0, fx.now) + fx.unit );
-	};
+/*// Ensure props that can't be negative don't go there on undershoot easing
+jQuery.each( fxAttrs.concat.apply( [], fxAttrs ), function( i, prop ) {
+	// Exclude marginTop, marginLeft, marginBottom and marginRight from this list
+	if ( !rMarginProp.test( prop ) ) {
+		jQuery.fx.step[ prop ] = function( fx ) {
+			jQuery.style( fx.elem, prop, Math.max(0, fx.now) + fx.unit );
+		};
+	}
 });
 
 if ( jQuery.expr && jQuery.expr.filters ) {
@@ -796,7 +848,7 @@ function defaultDisplay( nodeName ) {
 			// document to it; WebKit & Firefox won't allow reusing the iframe document.
 			if ( !iframeDoc || !iframe.createElement ) {
 				iframeDoc = ( iframe.contentWindow || iframe.contentDocument ).document;
-				iframeDoc.write( ( document.compatMode === "CSS1Compat" ? "<!doctype html>" : "" ) + "<html><body>" );
+				iframeDoc.write( ( jQuery.support.boxModel ? "<!doctype html>" : "" ) + "<html><body>" );
 				iframeDoc.close();
 			}
 
