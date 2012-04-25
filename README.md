@@ -7,13 +7,12 @@ How to use it?
 --------------
 
 Once the plugin has been loaded in the page, the job is done.
-The full jQuery animation API is still available and functionnal, in both transitions compatible browsers and incompatible ones.
+The full jQuery animation API is still available and functionnal, in both transitions compatible browsers and incompatible ones. *New*: color animations (text or background) and special easings work out of the box!
 
 When are CSS Transitions used?
 -----------------------------
 
 The plugin uses feature detection to turn transitions ON in the following browsers:
-
 - Chrome
 - Safari 4+
 - Firefox 4+
@@ -23,9 +22,8 @@ The plugin uses feature detection to turn transitions ON in the following browse
 Although CSS3 transitions are implemented in Opera, the implementation has too many bugs to be usable from the DOM API.
 
 Note that transitions are turned OFF under certain circumstencies:
-
-- when the animated object is not an element
 - when a step function is used
+- when the animated object is not an element
 
 How different is it?
 --------------------
@@ -46,16 +44,11 @@ When should I use it?
 
 In any case, it is a good practice to test animations both with and without the plugin to see if the benefit is real.
 
-Author
-======
-
-[@louis_remi](http://twitter.com/louis_remi)
-
 License
 =======
 
-MIT or GPL
-
-
+MIT Licensed http://louisremi.mit-license.org/, by [@louis_remi](http://twitter.com/louis_remi)
+  
+  
 
 PS: Looking for jquery.hoverTransition.js? This project is no longer maintained as it has never met my own expectations. A backup of the code is available in the download section.
