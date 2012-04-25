@@ -7,22 +7,22 @@ How to use it?
 --------------
 
 Once the plugin has been loaded in the page, the job is done.
-The full jQuery animation API is still available and functionnal, in both transitions compatible browsers and incompatible ones. *New*: color animations (text or background) and special easings work out of the box!
+The full jQuery animation API is still available and functionnal, in both transitions compatible browsers and incompatible ones. **New**: color animations (text or background) and special easings work out of the box!
 
 When are CSS Transitions used?
 -----------------------------
 
-The plugin uses feature detection to turn transitions ON in the following browsers:
-- Chrome
-- Safari 4+
-- Firefox 4+
-- iOS Safari
+The plugin uses feature detection to turn transitions ON in the following browsers:  
+- Chrome  
+- Safari 4+  
+- Firefox 4+  
+- iOS Safari  
 - Android browsers
 
 Although CSS3 transitions are implemented in Opera, the implementation has too many bugs to be usable from the DOM API.
 
-Note that transitions are turned OFF under certain circumstencies:
-- when a step function is used
+Note that transitions are turned OFF under certain circumstencies:  
+- when a step function is used  
 - when the animated object is not an element
 
 How different is it?
