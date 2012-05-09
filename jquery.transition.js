@@ -330,7 +330,7 @@ jQuery.fn.extend({
 						unit = parts[3] || ( jQuery.cssNumber[ p ] ? "" : "px" );
 
 						// We need to compute starting value
-						if ( unit !== "px" ) {
+						if ( unit !== "px" && p !== "opacity" ) {
 							jQuery.style( this, p, (end || 1) + unit);
 							start = ( (end || 1) / e.cur() ) * start;
 							jQuery.style( this, p, start + unit);
