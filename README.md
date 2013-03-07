@@ -18,6 +18,7 @@ The plugin uses feature detection to turn transitions ON in the following browse
 - Firefox 4+  
 - iOS Safari  
 - Android browsers
+- Internet Explorer 10+
 
 Although CSS3 transitions are implemented in Opera, the implementation has too many bugs to be usable from the DOM API.
 
