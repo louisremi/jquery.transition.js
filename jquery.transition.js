@@ -662,7 +662,7 @@ jQuery.extend( jQuery.fx.prototype, {
 			if ( !transition ) {
 				this.now = this.end;
 				this.pos = this.state = 1;
-				this.update();
+				// this.update();
 			// ++TRANSITION++
 			} else {
 				clearTimeout( transition.timeout );
@@ -748,7 +748,7 @@ jQuery.extend( jQuery.fx.prototype, {
 				this.now = this.start + ( (this.end - this.start) * this.pos );
 			}
 			// Perform the next step of the animation
-			this.update();
+			// this.update();
 		}
 
 		return true;
